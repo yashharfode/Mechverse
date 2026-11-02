@@ -174,7 +174,7 @@ const DEFAULT_CUSTOMIZATION: CustomizationSettings = {
   // ESP32 Micro Drone
   esp32DroneFrameColor: "#1e293b",
   esp32DronePropsColor: "#ef4444",
-  esp32DroneRearPropsColor: "#0f172a",
+  esp32DroneRearPropsColor: "#ef4444",
   // ROBO-RACER Rover
   roboRacerChassisColor: "#17171c",
   roboRacerAccentColor: "#ca8a04",

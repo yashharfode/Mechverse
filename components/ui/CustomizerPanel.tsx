@@ -485,9 +485,9 @@ export default function CustomizerPanel({
               </div>
             </section>
 
-            {/* Front Propellers Color */}
+            {/* Propellers Color (All 4 Props) */}
             <section className="space-y-2 pt-1 border-t border-white/10">
-              <span className="text-xs font-semibold text-gray-300">Front Orientation Props (M1/M2)</span>
+              <span className="text-xs font-semibold text-gray-300">Propellers Color (All 4 Props)</span>
               <div className="grid grid-cols-6 gap-1.5">
                 {ESP32_PROP_COLORS.map((col) => {
                   const isSelected = (customization.esp32DronePropsColor || "#ef4444").toLowerCase() === col.value.toLowerCase();
@@ -495,28 +495,11 @@ export default function CustomizerPanel({
                     <button
                       key={col.value}
                       title={col.name}
-                      onClick={() => onChangeCustomization({ ...customization, esp32DronePropsColor: col.value })}
-                      style={{ backgroundColor: col.value }}
-                      className={`h-7 rounded-lg border transition cursor-pointer ${
-                        isSelected ? "border-white scale-110 shadow-sm" : "border-white/20"
-                      }`}
-                    />
-                  );
-                })}
-              </div>
-            </section>
-
-            {/* Rear Propellers Color */}
-            <section className="space-y-2 pt-1 border-t border-white/10">
-              <span className="text-xs font-semibold text-gray-300">Rear Props (M3/M4)</span>
-              <div className="grid grid-cols-6 gap-1.5">
-                {ESP32_PROP_COLORS.map((col) => {
-                  const isSelected = (customization.esp32DroneRearPropsColor || "#0f172a").toLowerCase() === col.value.toLowerCase();
-                  return (
-                    <button
-                      key={col.value}
-                      title={col.name}
-                      onClick={() => onChangeCustomization({ ...customization, esp32DroneRearPropsColor: col.value })}
+                      onClick={() => onChangeCustomization({
+                        ...customization,
+                        esp32DronePropsColor: col.value,
+                        esp32DroneRearPropsColor: col.value,
+                      })}
                       style={{ backgroundColor: col.value }}
                       className={`h-7 rounded-lg border transition cursor-pointer ${
                         isSelected ? "border-white scale-110 shadow-sm" : "border-white/20"

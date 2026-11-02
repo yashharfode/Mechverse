@@ -42,7 +42,7 @@ export default function Esp32DroneModel({
   // Materials & Colors
   const frameColor = customization?.esp32DroneFrameColor || customization?.paintColor || "#1e293b"; // Frame & Guards
   const frontPropColor = customization?.esp32DronePropsColor || "#ef4444"; // Front Props
-  const rearPropColor = customization?.esp32DroneRearPropsColor || "#0f172a"; // Rear Props
+  const rearPropColor = customization?.esp32DroneRearPropsColor || customization?.esp32DronePropsColor || "#ef4444"; // Rear Props (defaults to same as front)
 
   const materials = useMemo(() => {
     return {
