@@ -1,4 +1,4 @@
-export type MachineId = "sports-car" | "electric-fan" | "walking-robot" | "robo-rumble" | "aero-450" | "drone-b" | "esp32-drone" | "robo-racer";
+export type MachineId = "sports-car" | "electric-fan" | "walking-robot" | "robo-rumble" | "aero-450" | "drone-b" | "esp32-drone" | "robo-racer" | "ropeway-robot";
 
 export type ViewMode = "view" | "exploded" | "components" | "customize" | "subassembly" | "arena" | "electronic";
 export type AppTheme = "dark" | "light";
@@ -224,6 +224,26 @@ export interface CustomizationSettings {
   // ROBO-RACER AI Vision Bot Configuration
   roboRacerChassisColor?: string;
   roboRacerAccentColor?: string;
+  // Ropeway Climbing Robot Configuration
+  ropewayChassisColor?: string;
+  ropewayArmColor?: string;
+  ropewayCrankColor?: string;
+  ropewayGearColor?: string;
+  ropewayFootColor?: string;
+  ropewayPulleyColor?: string;
+  ropewayHookColor?: string;
+}
+
+export interface RopewaySimulationState {
+  running: boolean;
+  direction: "forward" | "reverse" | "stop";
+  speedPct: number; // 0 to 100
+  inclineAngleDeg: number; // 0 to 45 degrees
+  cableTensionN: number;
+  positionM: number; // position along cable in meters
+  isStalled: boolean;
+  limitReached: boolean;
+  clampingForceN: number;
 }
 
 export interface DroneSimulationState {

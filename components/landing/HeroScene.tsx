@@ -292,7 +292,7 @@ export default function HeroScene({ onLaunchStudio, onOpenAR }: HeroSceneProps) 
       />
 
       {/* ================= 1. EDITORIAL HEADLINE & SANS SUBTITLE (CLEAN HIERARCHY) ================= */}
-      <div className="relative z-20 w-full pt-10 sm:pt-14 md:pt-16 text-center px-4 flex flex-col items-center pointer-events-none">
+      <div className="relative z-20 w-full pt-20 sm:pt-24 md:pt-26 lg:pt-28 text-center px-4 flex flex-col items-center pointer-events-none">
         <h1 className="font-serif-headline text-2xl sm:text-4xl md:text-5xl lg:text-[2.65rem] tracking-[0.04em] text-white uppercase font-normal leading-snug sm:leading-[1.12] select-text max-w-3xl">
           FOR THOSE WHO
           <br />
@@ -301,7 +301,7 @@ export default function HeroScene({ onLaunchStudio, onOpenAR }: HeroSceneProps) 
         </h1>
 
         {/* Clean Editorial Subtitle - Guaranteed clearance from 3D models */}
-        <p className="mt-2 text-xs sm:text-sm font-sans tracking-[0.22em] text-[#94A3B8] font-medium uppercase select-text">
+        <p className="mt-2.5 text-xs sm:text-sm font-sans tracking-[0.22em] text-[#94A3B8] font-medium uppercase select-text">
           Design. Simulate. Build real machines.
         </p>
       </div>

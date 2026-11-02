@@ -22,6 +22,7 @@ import {
   Compass,
   Wrench,
   Grid,
+  Cable,
 } from "lucide-react";
 import { MachineId, AppTheme } from "@/types/machine";
 
@@ -111,6 +112,14 @@ const PROJECT_LIBRARY: ProjectLibraryItem[] = [
     badge: "FLUID DYNAMICS",
     icon: Fan,
     accentColor: "from-sky-500 to-blue-600",
+  },
+  {
+    id: "ropeway-robot",
+    name: "Ropeway Robot",
+    category: "Cable Inspection Climber",
+    badge: "ROPEWAY CAD",
+    icon: Cable,
+    accentColor: "from-sky-500 to-indigo-600",
   },
 ];
 

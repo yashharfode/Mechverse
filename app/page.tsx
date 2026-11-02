@@ -178,6 +178,12 @@ const DEFAULT_CUSTOMIZATION: CustomizationSettings = {
   // ROBO-RACER Rover
   roboRacerChassisColor: "#17171c",
   roboRacerAccentColor: "#ca8a04",
+  // Ropeway Climbing Robot
+  ropewayChassisColor: "#0284c7",
+  ropewayArmColor: "#eab308",
+  ropewayCrankColor: "#ea580c",
+  ropewayGearColor: "#0284c7",
+  ropewayFootColor: "#0284c7",
 };
 
 const DEFAULT_FAN_SIMULATION: FanSimulationState = {
