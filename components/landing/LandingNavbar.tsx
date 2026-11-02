@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowRight, Camera, Menu, X, Sun, Moon } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Camera, Menu, X, Sun, Moon, Sliders } from "lucide-react";
 import { AppTheme, MachineId } from "@/types/machine";
 import { TOKENS } from "@/constants/designTokens";
 
@@ -93,6 +94,13 @@ export default function LandingNavbar({
           >
             BUILD LAB
           </a>
+          <Link
+            href="/design-lab"
+            className="text-[#FF6A1A] hover:text-[#ff8533] transition-colors duration-200 uppercase flex items-center gap-1 font-bold"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-[#FF6A1A] animate-pulse" />
+            <span>DESIGN LAB</span>
+          </Link>
           <a
             href="#workflow"
             className={`transition-colors duration-200 ${isLight ? "hover:text-slate-950" : "hover:text-white"}`}
@@ -226,6 +234,19 @@ export default function LandingNavbar({
               <span>BUILD LAB</span>
               <span className={`text-[10px] ${isLight ? "text-slate-400" : "text-white/40"}`}>03</span>
             </a>
+            <Link
+              href="/design-lab"
+              onClick={closeMenu}
+              className="py-2.5 text-left border-b border-[#FF6A1A]/30 text-[#FF6A1A] hover:text-[#ff8533] transition-colors flex items-center justify-between font-bold"
+            >
+              <span className="flex items-center gap-2">
+                <Sliders size={14} />
+                <span>DESIGN LAB</span>
+              </span>
+              <span className="text-[10px] bg-[#FF6A1A]/20 px-1.5 py-0.5 rounded text-[#FF6A1A] font-bold">
+                3D CAD
+              </span>
+            </Link>
             <a
               href="#workflow"
               onClick={closeMenu}

@@ -32,6 +32,7 @@
   - **ESP32 & Drone B UAVs**: 400Hz PID attitude stabilization, hovering physics, and virtual smartphone HUD controller.
 - 📱 **Floor-Anchored Web AR**: Instant augmented reality projection on real-world floors and desks via WebXR / QuickLook USDZ.
 - 🎨 **Deep Interactive Customizer**: Real-time paint finish customization (metallic, matte, carbon fiber), body accents, spoilers, and rims.
+- 🧪 **Dedicated 3D Parametric Design Lab (`/design-lab`)**: An independent engineering workspace where makers can select machine templates (Quadcopter F450, Rover Bot, Walking Robot, Table Fan), tweak frame colors, swap motors/cameras, toggle functional options (GPS, camera mounts, spoilers), inspect assembly component hierarchies, persist configurations locally, and export complete engineering JSON specifications.
 - 🌗 **True Dual-Theme Studio**: Handcrafted High-Contrast Light Mode and Immersive Dark Cyberpunk Studio.
 - 📦 **Visual 9-Machine Catalog**: Instant thumbnail gallery and quick-switch modal displaying images, DOF, AUW, and motor specifications.
 

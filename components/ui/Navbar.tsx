@@ -25,6 +25,7 @@ import {
   Cable,
   X,
   ExternalLink,
+  Sliders,
 } from "lucide-react";
 import { MachineId, AppTheme } from "@/types/machine";
 
@@ -447,6 +448,15 @@ export default function Navbar({
           <Wrench size={14} />
           <span>Builder</span>
         </button>
+
+        <a
+          href="/design-lab"
+          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition text-[#ff5500] hover:text-white hover:bg-[#ff5500]/20"
+          title="Open Parametric Design Lab"
+        >
+          <Sliders size={13} className="text-[#ff5500]" />
+          <span className="hidden md:inline">Design Lab</span>
+        </a>
       </nav>
 
       {/* ================= RIGHT: WEB AR, VIEW RESET & THEME ================= */}
