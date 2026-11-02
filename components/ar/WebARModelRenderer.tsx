@@ -23,6 +23,8 @@ interface WebARModelRendererProps {
   anchorPosition?: [number, number, number]; // Floor plane coordinates [X, 0, Z]
   torchEnabled?: boolean;
   showReticle?: boolean;
+  showFloorGrid?: boolean;
+  isAnchored?: boolean;
   selectedComponent?: string | null;
   onSelectComponent?: (id: string) => void;
   isHovering?: boolean;
@@ -51,6 +53,8 @@ export default function WebARModelRenderer({
   anchorPosition = [0, 0, 0],
   torchEnabled = false,
   showReticle = true,
+  showFloorGrid = true,
+  isAnchored = true,
   selectedComponent = null,
   onSelectComponent = () => {},
   isHovering = false,
@@ -158,13 +162,44 @@ export default function WebARModelRenderer({
       {/* High-Fidelity Surface Contact Shadow: Anchors the 3D model firmly to the real physical floor */}
       <ContactShadows
         position={[0, 0.001, 0]}
-        opacity={0.82}
+        opacity={isAnchored ? 0.88 : 0.45}
         scale={6}
-        blur={1.8}
+        blur={1.6}
         far={2.5}
         resolution={512}
         color="#000000"
       />
+
+      {/* Holographic LiDAR Ground Detection Grid (Visual Proof of Detected Floor) */}
+      {showFloorGrid && (
+        <group position={[0, 0.0005, 0]}>
+          {/* Circular Concentric Distance Rings on Detected Floor (0.5m, 1.0m, 1.5m, 2.0m) */}
+          <mesh rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[0.495, 0.505, 48]} />
+            <meshBasicMaterial color="#06b6d4" transparent opacity={0.35} side={THREE.DoubleSide} />
+          </mesh>
+          <mesh rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[0.995, 1.005, 64]} />
+            <meshBasicMaterial color="#38bdf8" transparent opacity={0.25} side={THREE.DoubleSide} />
+          </mesh>
+          <mesh rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[1.495, 1.505, 64]} />
+            <meshBasicMaterial color="#f97316" transparent opacity={0.2} side={THREE.DoubleSide} />
+          </mesh>
+          <mesh rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[1.995, 2.005, 64]} />
+            <meshBasicMaterial color="#f97316" transparent opacity={0.12} side={THREE.DoubleSide} />
+          </mesh>
+
+          {/* Subdued Floor Coordinate Grid */}
+          <gridHelper
+            args={[4.0, 16, "#f97316", "#0284c7"]}
+            position={[0, 0.0008, 0]}
+          >
+            <meshBasicMaterial transparent opacity={0.15} />
+          </gridHelper>
+        </group>
+      )}
 
       {/* Surface Detection CAD Reticle on Horizontal Floor Plane (Y = 0) */}
       {showReticle && (
@@ -172,46 +207,54 @@ export default function WebARModelRenderer({
           <group ref={reticleRingRef}>
             {/* Outer dotted tracking circle */}
             <mesh>
-              <ringGeometry args={[0.65, 0.68, 48]} />
-              <meshBasicMaterial color="#FF6A1A" opacity={0.6} transparent side={THREE.DoubleSide} />
+              <ringGeometry args={[0.62, 0.65, 48]} />
+              <meshBasicMaterial
+                color={isAnchored ? "#FF6A1A" : "#06b6d4"}
+                opacity={isAnchored ? 0.6 : 0.85}
+                transparent
+                side={THREE.DoubleSide}
+              />
             </mesh>
             {/* Inner target circle */}
             <mesh>
-              <ringGeometry args={[0.32, 0.34, 32]} />
-              <meshBasicMaterial color="#ffffff" opacity={0.45} transparent side={THREE.DoubleSide} />
+              <ringGeometry args={[0.28, 0.30, 32]} />
+              <meshBasicMaterial
+                color="#ffffff"
+                opacity={isAnchored ? 0.45 : 0.75}
+                transparent
+                side={THREE.DoubleSide}
+              />
             </mesh>
           </group>
 
           {/* Pulse radar ring */}
           <mesh ref={pulseRingRef}>
-            <ringGeometry args={[0.48, 0.50, 32]} />
-            <meshBasicMaterial color="#FF6A1A" opacity={0.25} transparent side={THREE.DoubleSide} />
+            <ringGeometry args={[0.42, 0.44, 32]} />
+            <meshBasicMaterial
+              color={isAnchored ? "#FF6A1A" : "#38bdf8"}
+              opacity={isAnchored ? 0.25 : 0.5}
+              transparent
+              side={THREE.DoubleSide}
+            />
           </mesh>
 
           {/* Crosshair surface alignment markers */}
           <mesh position={[0.7, 0, 0]}>
             <planeGeometry args={[0.1, 0.012]} />
-            <meshBasicMaterial color="#FF6A1A" />
+            <meshBasicMaterial color={isAnchored ? "#FF6A1A" : "#06b6d4"} />
           </mesh>
           <mesh position={[-0.7, 0, 0]}>
             <planeGeometry args={[0.1, 0.012]} />
-            <meshBasicMaterial color="#FF6A1A" />
+            <meshBasicMaterial color={isAnchored ? "#FF6A1A" : "#06b6d4"} />
           </mesh>
           <mesh position={[0, 0.7, 0]}>
             <planeGeometry args={[0.012, 0.1]} />
-            <meshBasicMaterial color="#FF6A1A" />
+            <meshBasicMaterial color={isAnchored ? "#FF6A1A" : "#06b6d4"} />
           </mesh>
           <mesh position={[0, -0.7, 0]}>
             <planeGeometry args={[0.012, 0.1]} />
-            <meshBasicMaterial color="#FF6A1A" />
+            <meshBasicMaterial color={isAnchored ? "#FF6A1A" : "#06b6d4"} />
           </mesh>
-
-          {/* Floor grid crosslines */}
-          <gridHelper
-            args={[1.6, 8, "#FF6A1A", "#334155"]}
-            position={[0, 0, -0.001]}
-            rotation={[Math.PI / 2, 0, 0]}
-          />
         </group>
       )}
 
