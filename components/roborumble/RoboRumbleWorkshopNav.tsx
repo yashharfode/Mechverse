@@ -23,12 +23,16 @@ export type RoboRumbleProjectTab =
 interface RoboRumbleWorkshopNavProps {
   activeTab: RoboRumbleProjectTab;
   onChangeTab: (tab: RoboRumbleProjectTab) => void;
+  simulatorMode?: "explorer" | "arena" | "track" | "customizer" | "compare";
+  onChangeSimulatorMode?: (mode: "explorer" | "arena" | "track" | "customizer" | "compare") => void;
   theme?: AppTheme;
 }
 
 export default function RoboRumbleWorkshopNav({
   activeTab,
   onChangeTab,
+  simulatorMode = "explorer",
+  onChangeSimulatorMode,
   theme = "dark",
 }: RoboRumbleWorkshopNavProps) {
   const isLight = theme === "light";
@@ -65,6 +69,13 @@ export default function RoboRumbleWorkshopNav({
 
   const getSubTabs = () => {
     switch (activePillar) {
+      case "simulator":
+        return [
+          { id: "sim-explorer", label: "3D CAD Explorer", simMode: "explorer" as const },
+          { id: "sim-arena", label: "Battle Arena", simMode: "arena" as const },
+          { id: "sim-track", label: "Obstacle Track", simMode: "track" as const },
+          { id: "sim-compare", label: "Vehicle Compare", simMode: "compare" as const },
+        ];
       case "engineering":
         return [
           { id: "how-it-works" as RoboRumbleProjectTab, label: "Kinetic Weapons & Armor Physics" },
@@ -154,13 +165,22 @@ export default function RoboRumbleWorkshopNav({
             <span className="text-[10px] uppercase font-mono text-gray-500 mr-1 shrink-0 hidden sm:inline">
               Sections:
             </span>
-            {subTabs.map((st) => {
-              const isSubActive = activeTab === st.id;
+            {subTabs.map((st: any) => {
+              const isSubActive = st.simMode
+                ? simulatorMode === st.simMode
+                : activeTab === st.id;
+
               return (
                 <button
                   key={st.id}
-                  onClick={() => onChangeTab(st.id)}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition whitespace-nowrap cursor-pointer shrink-0 ${
+                  onClick={() => {
+                    if (st.simMode) {
+                      onChangeSimulatorMode?.(st.simMode);
+                    } else {
+                      onChangeTab(st.id);
+                    }
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-semibold transition whitespace-nowrap cursor-pointer shrink-0 ${
                     isSubActive
                       ? isLight
                         ? "bg-white text-gray-900 shadow-sm border border-gray-300 font-bold"

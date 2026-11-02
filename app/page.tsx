@@ -630,9 +630,9 @@ export default function Home() {
               </div>
             )}
 
-            {/* If Robo Rumble, Render Secondary Workshop Tab Bar (Exact 7 Tabs as in Screenshot) */}
+            {/* If Robo Rumble, Render Dedicated Workshop Nav Bar */}
             {selectedMachineId === "robo-rumble" && (
-              <div className="px-4 py-2 bg-[#090b0f]/90 border-b border-white/10 z-30 shrink-0">
+              <div className="z-30 shrink-0">
                 <RoboRumbleWorkshopNav
                   activeTab={roboRumbleProjectTab}
                   onChangeTab={(tab) => {
@@ -643,6 +643,9 @@ export default function Home() {
                       setRoboSimulatorMode("explorer");
                     }
                   }}
+                  simulatorMode={roboSimulatorMode}
+                  onChangeSimulatorMode={(mode) => setRoboSimulatorMode(mode)}
+                  theme={theme}
                 />
               </div>
             )}
@@ -889,42 +892,6 @@ export default function Home() {
             ) : (
               /* ================= 3D SIMULATOR VIEWPORT ================= */
               <div className="flex-1 relative w-full h-full overflow-hidden">
-                {/* Robo Rumble Mode Sub-Bar (Explorer / Arena / Track / Customizer / Compare) - positioned cleanly below ControlsHeader so Exploded / View buttons are never hidden */}
-                {selectedMachineId === "robo-rumble" && (
-                  <div className="absolute top-14 sm:top-16 left-1/2 -translate-x-1/2 z-20 pointer-events-auto">
-                    <div
-                      className={`flex items-center gap-1 p-1 rounded-2xl backdrop-blur-xl transition ${
-                        theme === "light"
-                          ? "bg-white/90 border border-slate-200 shadow-md text-slate-800"
-                          : "bg-black/80 border border-white/15 shadow-2xl text-white"
-                      }`}
-                    >
-                      {[
-                        { id: "explorer", label: "3D CAD Explorer", icon: "🔍" },
-                        { id: "arena", label: "Battle Arena", icon: "⚔️" },
-                        { id: "track", label: "Obstacle Track", icon: "🏁" },
-                        { id: "customizer", label: "Customizer", icon: "🛠️" },
-                        { id: "compare", label: "Compare", icon: "⚖️" },
-                      ].map((m) => (
-                        <button
-                          key={m.id}
-                          onClick={() => setRoboSimulatorMode(m.id as any)}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-                            roboSimulatorMode === m.id
-                              ? "bg-rose-600 text-white shadow-lg shadow-rose-600/30"
-                              : theme === "light"
-                              ? "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
-                              : "text-gray-400 hover:text-white hover:bg-white/5"
-                          }`}
-                        >
-                          <span>{m.icon}</span>
-                          <span>{m.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 {/* If in Robo Rumble Arena Mode */}
                 {selectedMachineId === "robo-rumble" && roboSimulatorMode === "arena" ? (
                   <div className="w-full h-full relative">
@@ -1207,6 +1174,7 @@ export default function Home() {
                         onChangeSimulation={setRobotSimulation}
                         onSelectCameraPreset={setCameraPreset}
                         onReset={() => setCameraResetCount((c) => c + 1)}
+                        theme={theme}
                       />
                     )}
 
