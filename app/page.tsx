@@ -240,11 +240,11 @@ export default function Home() {
   // Drone B Industrial Octocopter Dedicated Workshop State
   const [droneBProjectPillar, setDroneBProjectPillar] = useState<DroneBNavPillar>("simulator");
 
-  // AERO-ESP Phone-Controlled Nano Drone State
+  // AERO-ESP Phone-Controlled Nano Drone State (Active & Armed by default)
   const [esp32ProjectTab, setEsp32ProjectTab] = useState<Esp32DroneNavTab>("simulator");
-  const [esp32Armed, setEsp32Armed] = useState<boolean>(false);
+  const [esp32Armed, setEsp32Armed] = useState<boolean>(true);
   const [esp32Controls, setEsp32Controls] = useState({
-    throttle: 1000,
+    throttle: 1350,
     pitch: 0,
     roll: 0,
     yaw: 0,
@@ -495,8 +495,8 @@ export default function Home() {
     }
     if (id === "esp32-drone") {
       setEsp32ProjectTab("simulator");
-      setEsp32Armed(false);
-      setEsp32Controls({ throttle: 1000, pitch: 0, roll: 0, yaw: 0 });
+      setEsp32Armed(true);
+      setEsp32Controls({ throttle: 1350, pitch: 0, roll: 0, yaw: 0 });
     }
     if (id === "robo-racer") {
       setRoboRacerTab("simulator");
@@ -1101,19 +1101,7 @@ export default function Home() {
                       }}
                     />
 
-                    {/* AERO-ESP Sleek Floating Bottom Flight Controller & Telemetry Dock (Zero Canvas Overlap) */}
-                    {selectedMachineId === "esp32-drone" && viewMode !== "exploded" && (
-                      <Esp32FlightDock
-                        theme={theme}
-                        isArmed={esp32Armed}
-                        onToggleArm={() => setEsp32Armed((prev) => !prev)}
-                        throttle={esp32Controls.throttle}
-                        pitch={esp32Controls.pitch}
-                        roll={esp32Controls.roll}
-                        yaw={esp32Controls.yaw}
-                        onControlChange={setEsp32Controls}
-                      />
-                    )}
+                    {/* AERO-ESP Flight Controller Dock hidden per user request; drone stays permanently armed/hovering */}
 
                     {/* ROBO-RACER Sleek Floating Bottom Drive Controller & Telemetry Dock (Zero Overlap on Car) */}
                     {selectedMachineId === "robo-racer" && viewMode !== "exploded" && (
