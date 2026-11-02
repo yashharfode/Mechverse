@@ -21,6 +21,7 @@ export interface SchematicBlock {
   height: number;
   color: string;
   pins: { id: string; label: string; side: "left" | "right" | "top" | "bottom" }[];
+  imageUrl?: string;
 }
 
 export interface PinoutRow {
@@ -609,9 +610,9 @@ export const ELECTRONICS_DATA_MAP: Record<string, MachineElectronicsData> = {
         subtitle: "7.4V 1500mAh Combat Pack",
         category: "power",
         x: 40,
-        y: 80,
-        width: 160,
-        height: 70,
+        y: 110,
+        width: 155,
+        height: 140,
         color: "#ef4444",
         pins: [
           { id: "rumb-bat", label: "7.4V (+)", side: "right" },
@@ -622,10 +623,10 @@ export const ELECTRONICS_DATA_MAP: Record<string, MachineElectronicsData> = {
         title: "Master Kill-Switch",
         subtitle: "Competition SPST 20A",
         category: "power",
-        x: 235,
-        y: 75,
+        x: 230,
+        y: 110,
         width: 140,
-        height: 75,
+        height: 140,
         color: "#f59e0b",
         pins: [
           { id: "sw-in", label: "BATT IN", side: "left" },
@@ -637,11 +638,12 @@ export const ELECTRONICS_DATA_MAP: Record<string, MachineElectronicsData> = {
         title: "Combat Flight MCU",
         subtitle: "ESP32 / NRF24 Receiver",
         category: "mcu",
-        x: 420,
-        y: 50,
-        width: 210,
-        height: 220,
+        x: 400,
+        y: 80,
+        width: 250,
+        height: 200,
         color: "#38bdf8",
+        imageUrl: "/images/components/esp32.svg",
         pins: [
           { id: "rumb-5v", label: "5V IN", side: "left" },
           { id: "rumb-radio", label: "SPI NRF24", side: "bottom" },
@@ -656,10 +658,11 @@ export const ELECTRONICS_DATA_MAP: Record<string, MachineElectronicsData> = {
         subtitle: "2x 15A Continuous Driver",
         category: "driver",
         x: 680,
-        y: 60,
-        width: 180,
-        height: 180,
+        y: 90,
+        width: 220,
+        height: 190,
         color: "#a855f7",
+        imageUrl: "/images/components/l298n.svg",
         pins: [
           { id: "dr-in", label: "PWM IN1-4", side: "left" },
           { id: "dr-pwr", label: "7.4V Main", side: "top" },
@@ -672,8 +675,8 @@ export const ELECTRONICS_DATA_MAP: Record<string, MachineElectronicsData> = {
         title: "4× TT Geared Motors",
         subtitle: "All-Metal 1:48 Ratio 4WD",
         category: "actuator",
-        x: 910,
-        y: 80,
+        x: 935,
+        y: 110,
         width: 160,
         height: 140,
         color: "#f97316",
@@ -684,10 +687,10 @@ export const ELECTRONICS_DATA_MAP: Record<string, MachineElectronicsData> = {
       },
     ],
     wires: [
-      { id: "rum1", fromName: "Battery", toName: "Kill-Switch", netName: "7.4V Raw", type: "power", color: "#ef4444", path: "M 200 115 L 235 115" },
-      { id: "rum2", fromName: "Kill-Switch", toName: "H-Bridge & Buck", netName: "7.4V Switched", type: "power", color: "#ef4444", path: "M 375 110 L 420 110 M 375 110 L 375 35 L 770 35 L 770 60" },
-      { id: "rum3", fromName: "MCU PWM", toName: "H-Bridge Logic", netName: "Differential PWM", type: "pwm", color: "#06b6d4", path: "M 630 120 L 680 120" },
-      { id: "rum4", fromName: "H-Bridge Out", toName: "4WD TT Motors", netName: "High-Torque Drive", type: "power", color: "#f97316", path: "M 860 140 L 910 140" },
+      { id: "rum1", fromName: "Battery", toName: "Kill-Switch", netName: "7.4V Raw", type: "power", color: "#ef4444", path: "M 195 180 L 230 180" },
+      { id: "rum2", fromName: "Kill-Switch", toName: "H-Bridge & MCU", netName: "7.4V Switched", type: "power", color: "#ef4444", path: "M 370 180 L 400 180 M 370 180 L 370 40 L 790 40 L 790 90" },
+      { id: "rum3", fromName: "MCU PWM", toName: "H-Bridge Logic", netName: "Control / PWM", type: "pwm", color: "#06b6d4", path: "M 650 180 L 680 180" },
+      { id: "rum4", fromName: "H-Bridge Out", toName: "4WD TT Motors", netName: "Motor Output", type: "power", color: "#f97316", path: "M 900 180 L 935 180" },
     ],
     pinouts: [
       { mcuPin: "GPIO 12", component: "H-Bridge IN1", componentPin: "Left Forward PWM", signalType: "Hardware PWM (20kHz)", voltage: "3.3V Logic", functionDesc: "Forward drive for left wheel pair" },

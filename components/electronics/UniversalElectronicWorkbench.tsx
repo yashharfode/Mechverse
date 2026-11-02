@@ -15,6 +15,10 @@ import {
   Filter,
   Eye,
   X,
+  Maximize2,
+  ZoomIn,
+  ZoomOut,
+  Crosshair,
 } from "lucide-react";
 import { MachineId, AppTheme } from "@/types/machine";
 import { ELECTRONICS_DATA_MAP, MachineElectronicsData } from "@/data/electronicsData";
@@ -39,6 +43,7 @@ export default function UniversalElectronicWorkbench({
   const [wireFilter, setWireFilter] = useState<string>("all");
   const [hoveredNet, setHoveredNet] = useState<string | null>(null);
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+  const [zoomLevel, setZoomLevel] = useState<number>(1.0);
 
   // Fallback to aero-450 if ID not directly found
   const data: MachineElectronicsData =
@@ -146,7 +151,7 @@ export default function UniversalElectronicWorkbench({
       </div>
 
       {/* ================= MAIN CONTENT VIEWPORT ================= */}
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* ================= TAB 1: INTERACTIVE SVG SCHEMATIC ================= */}
         {activeTab === "schematic" && (
           machineId === "drone-b" ? (
@@ -191,8 +196,8 @@ export default function UniversalElectronicWorkbench({
               </div>
             </div>
 
-            {/* Interactive Schematic Visual Canvas */}
-            <div className="flex-1 relative overflow-auto bg-[#05070c] p-4 flex items-center justify-center">
+            {/* Interactive Schematic Visual Canvas (100% Full Width with Zero Squeeze) */}
+            <div className="flex-1 relative overflow-auto bg-[#05070c] p-4 sm:p-6 flex items-center justify-center custom-scrollbar">
               {/* Technical CAD Grid Background */}
               <div
                 className="absolute inset-0 pointer-events-none opacity-20"
@@ -206,8 +211,11 @@ export default function UniversalElectronicWorkbench({
                 }}
               />
 
-              {/* Schematic Diagram Container */}
-              <div className="relative w-full max-w-[1100px] h-[480px] shrink-0 border border-white/10 rounded-2xl bg-[#080b12]/90 shadow-2xl p-4 overflow-hidden select-none">
+              {/* Schematic Diagram Canvas with Zoom / Transform Support */}
+              <div
+                style={{ transform: `scale(${zoomLevel})`, transformOrigin: "center center" }}
+                className="relative w-full max-w-[1200px] h-[520px] shrink-0 border border-white/10 rounded-2xl bg-[#080b12]/95 shadow-[0_20px_60px_rgba(0,0,0,0.85)] p-4 overflow-hidden select-none transition-transform duration-200"
+              >
                 {/* SVG Interconnect Signal Wires */}
                 <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
                   <defs>
@@ -227,8 +235,8 @@ export default function UniversalElectronicWorkbench({
                             d={wire.path}
                             fill="none"
                             stroke={wire.color}
-                            strokeWidth="6"
-                            strokeOpacity="0.4"
+                            strokeWidth="7"
+                            strokeOpacity="0.5"
                             strokeLinecap="round"
                           />
                         )}
@@ -237,7 +245,7 @@ export default function UniversalElectronicWorkbench({
                           d={wire.path}
                           fill="none"
                           stroke={wire.color}
-                          strokeWidth={isHovered ? "2.5" : "1.8"}
+                          strokeWidth={isHovered ? "3" : "2"}
                           strokeDasharray={wire.type === "data" ? "4 3" : "none"}
                           strokeLinecap="round"
                           className="transition-all duration-200"
@@ -247,7 +255,7 @@ export default function UniversalElectronicWorkbench({
                   })}
                 </svg>
 
-                {/* Schematic IC & Component Blocks */}
+                {/* Schematic IC & Component Blocks (High-Fidelity Image 02 Style) */}
                 {data.blocks.map((block) => {
                   const isSelected = selectedBlockId === block.id;
 
@@ -263,39 +271,65 @@ export default function UniversalElectronicWorkbench({
                         top: `${block.y}px`,
                         width: `${block.width}px`,
                         minHeight: `${block.height}px`,
+                        borderColor: isSelected ? block.color : `${block.color}50`,
+                        boxShadow: isSelected
+                          ? `0 0 25px ${block.color}40, 0 10px 25px rgba(0,0,0,0.8)`
+                          : `0 0 15px ${block.color}15, 0 6px 15px rgba(0,0,0,0.6)`,
                       }}
-                      className={`rounded-xl border backdrop-blur-md p-2.5 transition-all duration-200 cursor-pointer shadow-lg flex flex-col justify-between ${
+                      className={`rounded-2xl border backdrop-blur-md p-3.5 transition-all duration-200 cursor-pointer flex flex-col justify-between ${
                         isSelected
-                          ? "bg-[#141b2d] border-amber-400 ring-2 ring-amber-400/40 z-20 scale-102"
-                          : "bg-[#0b0f19] border-white/15 hover:border-white/30 z-10"
+                          ? "bg-[#101524] ring-2 ring-amber-400/50 z-20 scale-102"
+                          : "bg-[#0b0e17]/95 hover:bg-[#0f1420] z-10"
                       }`}
                     >
-                      <div>
-                        <div className="flex items-center justify-between gap-1 mb-1">
+                      <div className="space-y-2">
+                        {/* Category Badge & Power Status */}
+                        <div className="flex items-center justify-between gap-1">
                           <span
-                            className="text-[9px] font-mono font-bold uppercase px-1.5 py-0.5 rounded"
+                            className="text-[9px] font-mono font-black uppercase px-2 py-0.5 rounded-full border tracking-wide flex items-center gap-1.5"
                             style={{
-                              backgroundColor: `${block.color}20`,
+                              backgroundColor: `${block.color}15`,
+                              borderColor: `${block.color}60`,
                               color: block.color,
                             }}
                           >
+                            <span
+                              className="w-1.5 h-1.5 rounded-full"
+                              style={{ backgroundColor: block.color }}
+                            />
                             {block.category}
                           </span>
                         </div>
-                        <div className="text-xs font-bold text-white leading-tight">
-                          {block.title}
-                        </div>
-                        <div className="text-[10px] text-neutral-400 leading-tight mt-0.5 font-mono">
-                          {block.subtitle}
+
+                        {/* Title, Subtitle, and Optional Component Graphic */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs sm:text-[13px] font-bold text-white leading-snug">
+                              {block.title}
+                            </div>
+                            <div className="text-[10px] text-neutral-400 leading-tight mt-0.5 font-mono">
+                              {block.subtitle}
+                            </div>
+                          </div>
+
+                          {block.imageUrl && (
+                            <div className="shrink-0 w-14 h-14 rounded-xl bg-black/60 border border-white/10 p-1 flex items-center justify-center overflow-hidden shadow-inner">
+                              <img
+                                src={block.imageUrl}
+                                alt={block.title}
+                                className="w-full h-full object-contain filter drop-shadow"
+                              />
+                            </div>
+                          )}
                         </div>
                       </div>
 
                       {/* Component Pins Readout */}
-                      <div className="mt-2 pt-1.5 border-t border-white/10 flex flex-wrap gap-1">
+                      <div className="mt-3 pt-2 border-t border-white/10 flex flex-wrap gap-1.5">
                         {block.pins.map((pin) => (
                           <span
                             key={pin.id}
-                            className="text-[8px] font-mono text-neutral-300 bg-white/5 px-1 py-0.5 rounded border border-white/5"
+                            className="text-[8px] font-mono font-semibold text-neutral-300 bg-black/50 px-1.5 py-0.5 rounded-md border border-white/10"
                           >
                             {pin.label}
                           </span>
@@ -304,6 +338,61 @@ export default function UniversalElectronicWorkbench({
                     </div>
                   );
                 })}
+
+                {/* Bottom Viewport Controls (Image 02 Style: Fullscreen/Zoom/Reset) */}
+                <div className="absolute bottom-3 left-3 flex items-center gap-1 p-1 rounded-xl bg-black/80 backdrop-blur-md border border-white/15 text-neutral-300 pointer-events-auto shadow-lg">
+                  <button
+                    onClick={() => setZoomLevel(1.0)}
+                    className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 transition text-neutral-300 hover:text-white"
+                    title="Center & Fit Canvas"
+                  >
+                    <Maximize2 size={13} />
+                  </button>
+                  <button
+                    onClick={() => setZoomLevel((z) => Math.min(1.4, z + 0.1))}
+                    className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 transition text-xs font-mono font-bold text-neutral-300 hover:text-white"
+                    title="Zoom In"
+                  >
+                    <ZoomIn size={13} />
+                  </button>
+                  <button
+                    onClick={() => setZoomLevel((z) => Math.max(0.7, z - 0.1))}
+                    className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 transition text-xs font-mono font-bold text-neutral-300 hover:text-white"
+                    title="Zoom Out"
+                  >
+                    <ZoomOut size={13} />
+                  </button>
+                  <button
+                    onClick={() => setZoomLevel(1.0)}
+                    className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 transition text-neutral-300 hover:text-white"
+                    title="Reset Scale"
+                  >
+                    <Crosshair size={13} />
+                  </button>
+                </div>
+
+                {/* Bottom Signal Net Color Legend (Matching Image 02) */}
+                <div className="absolute bottom-3 right-3 hidden sm:flex items-center gap-2.5 p-1.5 px-3.5 rounded-full bg-black/80 backdrop-blur-md border border-white/15 text-[10px] font-mono text-neutral-300 pointer-events-auto shadow-lg">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#ef4444] shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+                    <span>Power (7.4V)</span>
+                  </div>
+                  <span className="text-white/20">|</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#06b6d4] shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
+                    <span>Control / PWM</span>
+                  </div>
+                  <span className="text-white/20">|</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#f97316] shadow-[0_0_8px_rgba(249,115,22,0.8)]" />
+                    <span>Motor Output</span>
+                  </div>
+                  <span className="text-white/20">|</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#64748b]" />
+                    <span>Ground (GND)</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -312,7 +401,7 @@ export default function UniversalElectronicWorkbench({
 
         {/* ================= TAB 2: PINOUT INTERCONNECT TABLE ================= */}
         {activeTab === "pinout" && (
-          <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4">
+          <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4 custom-scrollbar">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
@@ -364,7 +453,7 @@ export default function UniversalElectronicWorkbench({
 
         {/* ================= TAB 3: POWER & SAFETY DIRECTIVES ================= */}
         {activeTab === "safety" && (
-          <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-6">
+          <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-6 custom-scrollbar">
             {/* Battery Power System Overview */}
             <div className="p-4 sm:p-5 rounded-2xl border border-white/10 bg-[#0a0d14] space-y-3">
               <h3 className="text-sm font-bold text-white flex items-center gap-2 uppercase font-mono tracking-wider text-amber-400">
@@ -432,58 +521,28 @@ export default function UniversalElectronicWorkbench({
                 ))}
               </div>
             </div>
-          </div>
-        )}
 
-        {/* ================= RIGHT DETAIL SIDEBAR ================= */}
-        <div className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-white/10 bg-[#0a0d14]/80 p-4 flex flex-col justify-between shrink-0 space-y-4">
-          <div className="space-y-4">
-            <div className="text-xs font-mono text-neutral-400 uppercase tracking-wider font-semibold">
-              Power & Regulation
-            </div>
-
-            <div className="p-3 rounded-xl bg-white/5 border border-white/5 space-y-1.5 text-xs font-mono">
-              <div className="text-[10px] text-neutral-400 uppercase">Main Battery Bus</div>
-              <div className="text-white font-bold">{data.powerSystem.battery}</div>
-              <div className="text-amber-400 text-[11px]">{data.powerSystem.nominalVoltage}</div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="text-[11px] font-mono text-neutral-400 uppercase">Voltage Rails</div>
-              {data.voltageRails.map((rail, idx) => (
-                <div
-                  key={idx}
-                  className="p-2 rounded-lg bg-black/40 border border-white/5 flex items-center justify-between text-xs font-mono"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: rail.color }} />
-                    <span className="text-neutral-300 font-semibold">{rail.rail}</span>
-                  </div>
-                  <span className="text-neutral-400 text-[11px]">{rail.voltage}</span>
-                </div>
-              ))}
-            </div>
-            <div className="space-y-2 pt-2 border-t border-white/10">
-              <div className="text-[11px] font-mono text-neutral-400 uppercase">Buy Key Components</div>
-              <div className="space-y-1.5">
-                {data.blocks.slice(0, 3).map((block) => (
-                  <div key={block.id} className="p-2 rounded-lg bg-black/40 border border-white/5 space-y-1">
-                    <div className="text-[11px] font-bold text-white truncate">{block.title}</div>
+            {/* Buy Key Components Grid */}
+            <div className="space-y-3 pt-2">
+              <h4 className="text-xs font-mono uppercase text-neutral-400 font-bold tracking-wider">
+                Direct Indian Verified Sourcing Links
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {data.blocks.map((block) => (
+                  <div key={block.id} className="p-3 rounded-xl bg-[#0a0d14] border border-white/10 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono uppercase font-bold text-neutral-400">{block.category}</span>
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: block.color }} />
+                    </div>
+                    <div className="text-xs font-bold text-white truncate">{block.title}</div>
+                    <div className="text-[10px] text-neutral-400 font-mono truncate">{block.subtitle}</div>
                     <BuyLinkButtons componentName={block.title} compact={true} />
                   </div>
                 ))}
               </div>
             </div>
           </div>
-
-          <button
-            onClick={onClose}
-            className="w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white font-mono text-xs font-bold transition cursor-pointer flex items-center justify-center gap-2"
-          >
-            <span>Return to 3D CAD Studio</span>
-            <ArrowRight size={14} />
-          </button>
-        </div>
+        )}
       </div>
     </div>
   );

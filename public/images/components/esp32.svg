@@ -1,0 +1,75 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- ESP32 Dev Board PCB (Matte Black with Gold/Silver traces) -->
+  <rect x="30" y="20" width="140" height="160" rx="8" fill="#18191c" stroke="#38bdf8" stroke-width="2"/>
+  <rect x="35" y="25" width="130" height="150" rx="6" fill="#1e2026"/>
+  
+  <!-- Dual Row Header Pins (Left and Right) -->
+  <g fill="#f59e0b">
+    <!-- Left Pin Headers -->
+    <rect x="25" y="35" width="8" height="6" rx="1"/>
+    <rect x="25" y="47" width="8" height="6" rx="1"/>
+    <rect x="25" y="59" width="8" height="6" rx="1"/>
+    <rect x="25" y="71" width="8" height="6" rx="1"/>
+    <rect x="25" y="83" width="8" height="6" rx="1"/>
+    <rect x="25" y="95" width="8" height="6" rx="1"/>
+    <rect x="25" y="107" width="8" height="6" rx="1"/>
+    <rect x="25" y="119" width="8" height="6" rx="1"/>
+    <rect x="25" y="131" width="8" height="6" rx="1"/>
+    <rect x="25" y="143" width="8" height="6" rx="1"/>
+    <rect x="25" y="155" width="8" height="6" rx="1"/>
+
+    <!-- Right Pin Headers -->
+    <rect x="167" y="35" width="8" height="6" rx="1"/>
+    <rect x="167" y="47" width="8" height="6" rx="1"/>
+    <rect x="167" y="59" width="8" height="6" rx="1"/>
+    <rect x="167" y="71" width="8" height="6" rx="1"/>
+    <rect x="167" y="83" width="8" height="6" rx="1"/>
+    <rect x="167" y="95" width="8" height="6" rx="1"/>
+    <rect x="167" y="107" width="8" height="6" rx="1"/>
+    <rect x="167" y="119" width="8" height="6" rx="1"/>
+    <rect x="167" y="131" width="8" height="6" rx="1"/>
+    <rect x="167" y="143" width="8" height="6" rx="1"/>
+    <rect x="167" y="155" width="8" height="6" rx="1"/>
+  </g>
+
+  <!-- Micro-USB Port at bottom -->
+  <rect x="82" y="166" width="36" height="18" rx="3" fill="#94a3b8" stroke="#cbd5e1" stroke-width="1.5"/>
+  <rect x="90" y="174" width="20" height="6" rx="1" fill="#334155"/>
+
+  <!-- ESP-WROOM-32 Metal RF Shield Can -->
+  <rect x="52" y="45" width="96" height="85" rx="4" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1.5"/>
+  <rect x="56" y="49" width="88" height="77" rx="2" fill="#e2e8f0"/>
+  
+  <!-- Wi-Fi PCB Inverted-F Meander Antenna (Gold on Top) -->
+  <rect x="58" y="24" width="84" height="16" rx="2" fill="#d97706"/>
+  <path d="M62 26H138V30H62V26ZM66 30V38H72V30H66ZM78 30V38H84V30H78ZM90 30V38H96V30H90ZM102 30V38H108V30H102ZM114 30V38H120V30H114ZM126 30V38H132V30H126Z" fill="#b45309"/>
+
+  <!-- ESPRESSIF ESP32 Laser Etching -->
+  <text x="100" y="78" font-family="monospace" font-size="10" font-weight="bold" fill="#334155" text-anchor="middle">ESPRESSIF</text>
+  <text x="100" y="93" font-family="monospace" font-size="12" font-weight="900" fill="#0f172a" text-anchor="middle">ESP-WROOM-32</text>
+  <text x="100" y="106" font-family="monospace" font-size="7" fill="#64748b" text-anchor="middle">FCC ID: 2AC7Z-ESPWROOM32</text>
+  <circle cx="132" cy="114" r="5" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+  <path d="M130 114H134M132 112V116" stroke="#64748b" stroke-width="1"/>
+
+  <!-- Push Buttons (EN and BOOT) -->
+  <rect x="42" y="146" width="14" height="14" rx="2" fill="#64748b"/>
+  <circle cx="49" cy="153" r="4" fill="#f8fafc"/>
+  <text x="49" y="142" font-family="sans-serif" font-size="6" font-weight="bold" fill="#94a3b8" text-anchor="middle">EN</text>
+
+  <rect x="144" y="146" width="14" height="14" rx="2" fill="#64748b"/>
+  <circle cx="151" cy="153" r="4" fill="#f8fafc"/>
+  <text x="151" y="142" font-family="sans-serif" font-size="6" font-weight="bold" fill="#94a3b8" text-anchor="middle">BOOT</text>
+
+  <!-- AMS1117 3.3V Voltage Regulator IC -->
+  <rect x="88" y="136" width="24" height="18" rx="2" fill="#0f172a"/>
+  <rect x="94" y="130" width="12" height="6" fill="#94a3b8"/>
+  <rect x="91" y="154" width="4" height="6" fill="#94a3b8"/>
+  <rect x="98" y="154" width="4" height="6" fill="#94a3b8"/>
+  <rect x="105" y="154" width="4" height="6" fill="#94a3b8"/>
+
+  <!-- Status Red & Blue LEDs -->
+  <circle cx="68" cy="153" r="3" fill="#ef4444"/>
+  <circle cx="68" cy="153" r="1.5" fill="#fee2e2"/>
+  <circle cx="78" cy="153" r="3" fill="#38bdf8"/>
+  <circle cx="78" cy="153" r="1.5" fill="#f0f9ff"/>
+</svg>
