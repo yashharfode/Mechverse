@@ -20,6 +20,7 @@ import {
 import { DRONE_B_SHOPPING_LIST, DRONE_B_ENGINEERING_SPECS } from "@/data/droneBSourcingData";
 import BuyLinkButtons from "@/components/ui/BuyLinkButtons";
 import UniversalElectronicWorkbench from "@/components/electronics/UniversalElectronicWorkbench";
+import DroneBElectronicsWiring from "./DroneBElectronicsWiring";
 
 interface DroneBWorkshopViewProps {
   activePillar: "engineering" | "electronics" | "bom" | "guide";
@@ -121,12 +122,9 @@ export default function DroneBWorkshopView({
 
       {/* ================= 2. ELECTRONICS & WIRING ================= */}
       {activePillar === "electronics" && (
-        <div className="w-full h-full min-h-[640px]">
-          <UniversalElectronicWorkbench
-            machineId="drone-b"
-            theme={theme as any}
-            isEmbedded={true}
-          />
+        <div className="w-full space-y-4">
+          {/* Dedicated Clear Visual Wiring Architecture for Drone-B */}
+          <DroneBElectronicsWiring theme={theme as any} />
         </div>
       )}
 

@@ -19,6 +19,7 @@ import {
 import { MachineId, AppTheme } from "@/types/machine";
 import { ELECTRONICS_DATA_MAP, MachineElectronicsData } from "@/data/electronicsData";
 import BuyLinkButtons from "@/components/ui/BuyLinkButtons";
+import DroneBElectronicsWiring from "@/components/droneb/DroneBElectronicsWiring";
 
 interface UniversalElectronicWorkbenchProps {
   machineId: MachineId;
@@ -148,7 +149,12 @@ export default function UniversalElectronicWorkbench({
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* ================= TAB 1: INTERACTIVE SVG SCHEMATIC ================= */}
         {activeTab === "schematic" && (
-          <div className="flex-1 flex flex-col overflow-hidden">
+          machineId === "drone-b" ? (
+            <div className="flex-1 overflow-y-auto p-3 sm:p-5 bg-[#05070c] custom-scrollbar">
+              <DroneBElectronicsWiring theme={theme as any} />
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col overflow-hidden">
             {/* Filter Pills & Voltage Rails Header */}
             <div className="px-4 py-2 bg-black/40 border-b border-white/5 flex flex-wrap items-center justify-between gap-3 text-xs font-mono shrink-0">
               <div className="flex items-center gap-1.5 flex-wrap">
@@ -301,7 +307,8 @@ export default function UniversalElectronicWorkbench({
               </div>
             </div>
           </div>
-        )}
+        )
+      )}
 
         {/* ================= TAB 2: PINOUT INTERCONNECT TABLE ================= */}
         {activeTab === "pinout" && (
