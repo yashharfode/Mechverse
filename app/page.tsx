@@ -73,13 +73,23 @@ import AeroTroubleshooting from "@/components/aerodrone/AeroTroubleshooting";
 import AeroBOM from "@/components/aerodrone/AeroBOM";
 import AeroEngineeringDocs from "@/components/aerodrone/AeroEngineeringDocs";
 import Esp32PhoneControllerOverlay from "@/components/esp32drone/Esp32PhoneControllerOverlay";
+// Ropeway Climbing Robot Dedicated Workshop Components
+import RopewayWorkshopNav from "@/components/ropeway/RopewayWorkshopNav";
+import RopewaySimulationControls from "@/components/ropeway/RopewaySimulationControls";
+import RopewayHowItWorks from "@/components/ropeway/RopewayHowItWorks";
+import RopewayBuildGuide from "@/components/ropeway/RopewayBuildGuide";
+import RopewayFreeSourcing from "@/components/ropeway/RopewayFreeSourcing";
+import RopewayBOM from "@/components/ropeway/RopewayBOM";
+import RopewayTroubleshooting from "@/components/ropeway/RopewayTroubleshooting";
+import RopewayEngineeringDocs from "@/components/ropeway/RopewayEngineeringDocs";
+import RopewayCustomizer from "@/components/ropeway/RopewayCustomizer";
 import Esp32FlightDock from "@/components/esp32drone/Esp32FlightDock";
 import RoboRacerWorkshopOverlay from "@/components/roboracer/RoboRacerWorkshopOverlay";
 import RoboRacerDriveDock from "@/components/roboracer/RoboRacerDriveDock";
 import UniversalWorkshopNav, { UniversalPillar } from "@/components/ui/UniversalWorkshopNav";
 import DroneBWorkshopNav, { DroneBNavPillar } from "@/components/droneb/DroneBWorkshopNav";
 import DroneBWorkshopView from "@/components/droneb/DroneBWorkshopView";
-import { AeroNavTab, AppTheme, Esp32DroneNavTab, RoboRacerNavTab } from "@/types/machine";
+import { AeroNavTab, AppTheme, Esp32DroneNavTab, RoboRacerNavTab, RopewayNavTab, RopewaySimulationState } from "@/types/machine";
 import { explosionAudio } from "@/lib/audio/explosionSoundEngine";
 
 // Dynamic import with SSR disabled to prevent WebGL server rendering errors
@@ -178,6 +188,27 @@ const DEFAULT_CUSTOMIZATION: CustomizationSettings = {
   // ROBO-RACER Rover
   roboRacerChassisColor: "#17171c",
   roboRacerAccentColor: "#ca8a04",
+  // Ropeway Climbing Robot Configuration
+  ropewayChassisColor: "#0284c7",
+  ropewayPulleyColor: "#0f172a",
+  ropewayHookColor: "#eab308",
+  ropewayMotorType: "n20-100rpm",
+  ropewayBatteryType: "2s-liion",
+  ropewayChassisMaterial: "petg-3dprint",
+  ropewayCableType: "steel-wire-2mm",
+  ropewayPayload: "camera-fpv",
+};
+
+const DEFAULT_ROPEWAY_SIMULATION: RopewaySimulationState = {
+  running: true,
+  direction: "forward",
+  speedPct: 65,
+  inclineAngleDeg: 15,
+  cableTensionN: 200,
+  positionM: 0,
+  isStalled: false,
+  limitReached: false,
+  clampingForceN: 35,
 };
 
 const DEFAULT_FAN_SIMULATION: FanSimulationState = {
@@ -227,6 +258,10 @@ export default function Home() {
 
   // Walking Robot Workshop Project Tab
   const [robotProjectTab, setRobotProjectTab] = useState<RobotProjectTab>("simulator");
+
+  // Ropeway Climbing Robot Dedicated Workshop State
+  const [ropewayProjectTab, setRopewayProjectTab] = useState<RopewayNavTab>("simulator");
+  const [ropewaySimulation, setRopewaySimulation] = useState<RopewaySimulationState>(DEFAULT_ROPEWAY_SIMULATION);
 
   // AERO-450 Quadcopter Dedicated Workshop State
   const [aeroProjectTab, setAeroProjectTab] = useState<AeroNavTab>("explorer");
@@ -492,6 +527,10 @@ export default function Home() {
       setEsp32Armed(false);
       setEsp32Controls({ throttle: 1000, pitch: 0, roll: 0, yaw: 0 });
     }
+    if (id === "ropeway-robot") {
+      setRopewayProjectTab("simulator");
+      setRopewaySimulation(DEFAULT_ROPEWAY_SIMULATION);
+    }
     if (id === "robo-racer") {
       setRoboRacerTab("simulator");
       setRoboRacerDriving(false);
@@ -657,6 +696,22 @@ export default function Home() {
               </div>
             )}
 
+            {/* If Ropeway Robot, Render Dedicated 8-Tab Workshop Bar */}
+            {selectedMachineId === "ropeway-robot" && (
+              <div className="px-4 py-2 bg-[#090b0f]/90 border-b border-white/10 z-30 shrink-0">
+                <RopewayWorkshopNav
+                  activeTab={ropewayProjectTab}
+                  onChangeTab={(tab) => {
+                    setRopewayProjectTab(tab);
+                    if (tab !== "simulator" && tab !== "customizer") {
+                      setViewMode("view");
+                    }
+                  }}
+                  theme={theme}
+                />
+              </div>
+            )}
+
             {/* If Drone B Octocopter, Render Dedicated Workshop Nav Bar */}
             {selectedMachineId === "drone-b" && (
               <div className="z-30 shrink-0">
@@ -771,6 +826,22 @@ export default function Home() {
                 {robotProjectTab === "bom" && <RobotBOM />}
                 {robotProjectTab === "troubleshooting" && <RobotTroubleshooting />}
                 {robotProjectTab === "docs" && <RobotEngineeringDocs />}
+              </div>
+            ) : selectedMachineId === "ropeway-robot" && ropewayProjectTab !== "simulator" ? (
+              /* Content Area Based on Ropeway Robot Workshop Tab */
+              <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#090b0f]">
+                {ropewayProjectTab === "how-it-works" && <RopewayHowItWorks />}
+                {ropewayProjectTab === "build-guide" && <RopewayBuildGuide />}
+                {ropewayProjectTab === "free-sourcing" && <RopewayFreeSourcing />}
+                {ropewayProjectTab === "bom" && <RopewayBOM />}
+                {ropewayProjectTab === "troubleshooting" && <RopewayTroubleshooting />}
+                {ropewayProjectTab === "engineering-docs" && <RopewayEngineeringDocs />}
+                {ropewayProjectTab === "customizer" && (
+                  <RopewayCustomizer
+                    customization={customization}
+                    onChange={setCustomization}
+                  />
+                )}
               </div>
             ) : selectedMachineId === "robo-rumble" && roboRumbleProjectTab !== "simulator" ? (
               /* Content Area Based on Robo Rumble Workshop Tab */
@@ -1060,6 +1131,7 @@ export default function Home() {
                       customization={customization}
                       simulation={simulation}
                       robotSimulation={robotSimulation}
+                      ropewaySimulation={ropewaySimulation}
                       selectedComponent={
                         activeSubAssemblyId ? selectedSubPartId : selectedComponentId
                       }
@@ -1173,6 +1245,14 @@ export default function Home() {
                         onChangeSimulation={setRobotSimulation}
                         onSelectCameraPreset={setCameraPreset}
                         onReset={() => setCameraResetCount((c) => c + 1)}
+                      />
+                    )}
+
+                    {/* Ropeway Climbing Robot Telemetry & Cable Controls */}
+                    {selectedMachineId === "ropeway-robot" && !activeSubAssemblyId && (
+                      <RopewaySimulationControls
+                        simulation={ropewaySimulation}
+                        onUpdateSimulation={setRopewaySimulation}
                       />
                     )}
 

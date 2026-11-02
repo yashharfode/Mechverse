@@ -29,6 +29,7 @@ export default function LandingPage({
 }: LandingPageProps) {
   const isLight = theme === "light";
 
+
   return (
     <div
       className={`min-h-screen w-full flex flex-col font-sans selection:bg-[#FF6A1A] selection:text-white transition-colors duration-300 ${

@@ -12,6 +12,7 @@ import {
   Plane,
   Hexagon,
   Smartphone,
+  Cable,
   Sun,
   Moon,
   Camera,
@@ -55,6 +56,14 @@ const PROJECT_LIBRARY: ProjectLibraryItem[] = [
     badge: "₹2,888",
     icon: Crosshair,
     accentColor: "from-orange-500 to-amber-500",
+  },
+  {
+    id: "ropeway-robot",
+    name: "Ropeway Robot",
+    category: "Cable Inspection Climber (Hand-over-Hand)",
+    badge: "₹1,450",
+    icon: Cable,
+    accentColor: "from-sky-500 to-indigo-600",
   },
   {
     id: "esp32-drone",

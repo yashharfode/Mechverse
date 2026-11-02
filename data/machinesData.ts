@@ -4,6 +4,7 @@ import { ROBO_RUMBLE_MACHINE_DATA } from "./roboRumbleData";
 import { AERO_DRONE_MACHINE_DATA } from "./aeroDroneData";
 import { DRONE_B_MACHINE_DATA } from "./droneBData";
 import { ESP32_DRONE_MACHINE_DATA } from "./esp32DroneData";
+import { ROPEWAY_ROBOT_MACHINE_DATA } from "./ropewayRobotData";
 import { ROBO_RACER_MACHINE_DATA } from "./roboRacerData";
 
 export const MACHINES_DATA: Record<string, MachineData> = {
@@ -449,4 +450,5 @@ export const MACHINES_DATA: Record<string, MachineData> = {
   "drone-b": DRONE_B_MACHINE_DATA,
   "esp32-drone": ESP32_DRONE_MACHINE_DATA,
   "robo-racer": ROBO_RACER_MACHINE_DATA,
+  "ropeway-robot": ROPEWAY_ROBOT_MACHINE_DATA,
 };
