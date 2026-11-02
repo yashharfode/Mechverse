@@ -14,6 +14,7 @@ import { AppTheme } from "@/types/machine";
 export type RobotProjectTab =
   | "simulator"
   | "how-it-works"
+  | "electronics"
   | "build-guide"
   | "free-sourcing"
   | "bom"
@@ -36,6 +37,7 @@ export default function RobotWorkshopNav({
   const getActivePillar = (): "simulator" | "engineering" | "electronics" | "bom" | "guide" => {
     if (activeTab === "simulator") return "simulator";
     if (activeTab === "how-it-works" || activeTab === "docs") return "engineering";
+    if (activeTab === "electronics") return "electronics";
     if (activeTab === "bom" || activeTab === "free-sourcing") return "bom";
     if (activeTab === "build-guide" || activeTab === "troubleshooting") return "guide";
     return "simulator";
@@ -52,7 +54,7 @@ export default function RobotWorkshopNav({
         onChangeTab("how-it-works");
         break;
       case "electronics":
-        onChangeTab("docs");
+        onChangeTab("electronics");
         break;
       case "bom":
         onChangeTab("bom");

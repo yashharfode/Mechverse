@@ -779,6 +779,14 @@ export default function Home() {
                 }`}
               >
                 {robotProjectTab === "how-it-works" && <RobotHowItWorks />}
+                {robotProjectTab === "electronics" && (
+                  <UniversalElectronicWorkbench
+                    machineId="walking-robot"
+                    theme={theme}
+                    isEmbedded={true}
+                    onClose={() => setRobotProjectTab("simulator")}
+                  />
+                )}
                 {robotProjectTab === "build-guide" && <RobotBuildGuide />}
                 {robotProjectTab === "free-sourcing" && <RobotFreeSourcing />}
                 {robotProjectTab === "bom" && <RobotBOM />}
@@ -793,6 +801,14 @@ export default function Home() {
                 }`}
               >
                 {roboRumbleProjectTab === "how-it-works" && <RoboRumbleHowItWorks />}
+                {roboRumbleProjectTab === "electronics" && (
+                  <UniversalElectronicWorkbench
+                    machineId="robo-rumble"
+                    theme={theme}
+                    isEmbedded={true}
+                    onClose={() => setRoboRumbleProjectTab("simulator")}
+                  />
+                )}
                 {roboRumbleProjectTab === "build-guide" && <RoboRumbleBuildGuide />}
                 {roboRumbleProjectTab === "free-sourcing" && <RoboRumbleFreeSourcing />}
                 {roboRumbleProjectTab === "bom" && <RoboRumbleBOM />}

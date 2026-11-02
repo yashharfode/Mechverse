@@ -33,6 +33,7 @@ import {
 import { AppTheme, RoboRacerNavTab } from "@/types/machine";
 import { ROBO_RACER_SHOPPING_LIST } from "@/data/roboRacerData";
 import BuyLinkButtons from "@/components/ui/BuyLinkButtons";
+import UniversalElectronicWorkbench from "@/components/electronics/UniversalElectronicWorkbench";
 
 interface RoboRacerWorkshopOverlayProps {
   theme?: AppTheme;
@@ -354,91 +355,12 @@ export default function RoboRacerWorkshopOverlay({
 
       {/* ================= TAB 3: SCHEMATIC & PINOUT MAPPING ================= */}
       {activeTab === "schematic" && (
-        <div className="p-4 sm:p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-          <div>
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <Zap className="text-amber-400" />
-              Complete ESP32 Pinout & Wiring Interconnect
-            </h3>
-            <p className="text-xs text-gray-400 mt-1">
-              Zero-guesswork GPIO wiring map for connecting the ESP32 brain, L298N driver, HC-SR04 sonar, and SG90 pan servo.
-            </p>
-          </div>
-
-          <div className="overflow-x-auto rounded-xl border border-white/10">
-            <table className="w-full text-left text-xs text-gray-300">
-              <thead className="bg-white/5 text-gray-400 uppercase font-mono text-[10px]">
-                <tr>
-                  <th className="p-3">Device Pin</th>
-                  <th className="p-3">ESP32 Pin</th>
-                  <th className="p-3">Signal Type</th>
-                  <th className="p-3">Electrical Voltage</th>
-                  <th className="p-3">Functional Role</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5 font-mono text-[11px]">
-                <tr className="hover:bg-white/5">
-                  <td className="p-3 text-sky-400">HC-SR04 Trig</td>
-                  <td className="p-3 font-bold text-white">GPIO 18</td>
-                  <td className="p-3 text-amber-300">Digital Output</td>
-                  <td className="p-3">3.3V Logic</td>
-                  <td className="p-3 font-sans">10µs ultrasonic sonic trigger chirp</td>
-                </tr>
-                <tr className="hover:bg-white/5">
-                  <td className="p-3 text-sky-400">HC-SR04 Echo</td>
-                  <td className="p-3 font-bold text-white">GPIO 19</td>
-                  <td className="p-3 text-amber-300">Digital Input</td>
-                  <td className="p-3 text-red-300">3.3V (via 1k/2k Divider)</td>
-                  <td className="p-3 font-sans">High-pulse duration returns distance</td>
-                </tr>
-                <tr className="hover:bg-white/5">
-                  <td className="p-3 text-amber-400">SG90 Servo PWM</td>
-                  <td className="p-3 font-bold text-white">GPIO 13</td>
-                  <td className="p-3 text-amber-300">50Hz PWM</td>
-                  <td className="p-3">3.3V Logic</td>
-                  <td className="p-3 font-sans">Controls camera pan angle (0° to 180°)</td>
-                </tr>
-                <tr className="hover:bg-white/5">
-                  <td className="p-3 text-orange-400">L298N ENA (Left Speed)</td>
-                  <td className="p-3 font-bold text-white">GPIO 27</td>
-                  <td className="p-3 text-amber-300">20kHz PWM</td>
-                  <td className="p-3">3.3V Logic</td>
-                  <td className="p-3 font-sans">Hardware PWM duty cycle for left flank</td>
-                </tr>
-                <tr className="hover:bg-white/5">
-                  <td className="p-3 text-orange-400">L298N IN1 / IN2</td>
-                  <td className="p-3 font-bold text-white">GPIO 25 / 26</td>
-                  <td className="p-3 text-amber-300">Digital Output</td>
-                  <td className="p-3">3.3V Logic</td>
-                  <td className="p-3 font-sans">Left motor forward / reverse polarity</td>
-                </tr>
-                <tr className="hover:bg-white/5">
-                  <td className="p-3 text-orange-400">L298N ENB (Right Speed)</td>
-                  <td className="p-3 font-bold text-white">GPIO 33</td>
-                  <td className="p-3 text-amber-300">20kHz PWM</td>
-                  <td className="p-3">3.3V Logic</td>
-                  <td className="p-3 font-sans">Hardware PWM duty cycle for right flank</td>
-                </tr>
-                <tr className="hover:bg-white/5">
-                  <td className="p-3 text-orange-400">L298N IN3 / IN4</td>
-                  <td className="p-3 font-bold text-white">GPIO 14 / 12</td>
-                  <td className="p-3 text-amber-300">Digital Output</td>
-                  <td className="p-3">3.3V Logic</td>
-                  <td className="p-3 font-sans">Right motor forward / reverse polarity</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div className="p-3.5 rounded-xl border border-amber-500/30 bg-amber-950/20 space-y-1.5">
-            <div className="flex items-center gap-2 text-amber-400 text-xs font-bold">
-              <AlertTriangle size={15} />
-              <span>Critical Electrical Safety Rule: Common Ground</span>
-            </div>
-            <p className="text-xs text-gray-300">
-              Always tie the negative terminal (GND) of the 7.4V Li-ion battery, the LM2596 buck converter, the L298N motor driver, and the ESP32 board together to a unified Common Ground. Failure to connect common ground results in erratic motor stutter and floating logic noise.
-            </p>
-          </div>
+        <div className="w-full h-full min-h-[640px]">
+          <UniversalElectronicWorkbench
+            machineId="robo-racer"
+            theme={theme}
+            isEmbedded={true}
+          />
         </div>
       )}
 

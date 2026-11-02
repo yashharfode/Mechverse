@@ -33,6 +33,7 @@ import {
 import { AppTheme, Esp32DroneNavTab } from "@/types/machine";
 import { ESP32_DRONE_SHOPPING_LIST } from "@/data/esp32DroneData";
 import BuyLinkButtons from "@/components/ui/BuyLinkButtons";
+import UniversalElectronicWorkbench from "@/components/electronics/UniversalElectronicWorkbench";
 
 interface Esp32PhoneControllerOverlayProps {
   theme?: AppTheme;
@@ -851,54 +852,12 @@ void loop() {
 
       {/* ================= TAB 6: ELECTRICAL SCHEMATIC & WIRING ================= */}
       {activeTab === "schematic" && (
-        <div className="flex-1 p-6 overflow-y-auto custom-scrollbar max-w-5xl mx-auto space-y-6">
-          <div>
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <Zap className="text-amber-400" size={22} />
-              <span>Full Electrical Schematic &amp; Pinout</span>
-            </h2>
-            <p className="text-xs text-gray-400 mt-1">
-              ESP32 to MPU6050 I2C bus, SI2302 SOT-23 MOSFET gates, 1N5819 Schottky protection, and 1S LiPo voltage divider.
-            </p>
-          </div>
-
-          <div
-            className={`p-6 rounded-2xl border font-mono text-xs space-y-4 ${
-              isLight ? "bg-white border-gray-200" : "bg-[#090c12] border-white/10"
-            }`}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl border border-white/5 bg-white/[0.02]">
-                <h4 className="font-bold text-sky-400 mb-2">I2C BUS (MPU-6050)</h4>
-                <div className="space-y-1 text-[11px] text-gray-300">
-                  <div>ESP32 GPIO 21 &rarr; MPU6050 SDA (Data)</div>
-                  <div>ESP32 GPIO 22 &rarr; MPU6050 SCL (Clock)</div>
-                  <div>ESP32 3V3 Pin &rarr; MPU6050 VCC (3.3V)</div>
-                  <div>ESP32 GND Pin &rarr; MPU6050 GND (Common)</div>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-xl border border-white/5 bg-white/[0.02]">
-                <h4 className="font-bold text-amber-400 mb-2">MCPWM MOTOR GATES</h4>
-                <div className="space-y-1 text-[11px] text-gray-300">
-                  <div>ESP32 GPIO 19 &rarr; Motor 1 FET Gate (Front-Right, CCW)</div>
-                  <div>ESP32 GPIO 18 &rarr; Motor 2 FET Gate (Front-Left, CW)</div>
-                  <div>ESP32 GPIO 05 &rarr; Motor 3 FET Gate (Rear-Left, CCW)</div>
-                  <div>ESP32 GPIO 17 &rarr; Motor 4 FET Gate (Rear-Right, CW)</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-200 text-xs">
-              <div className="font-bold flex items-center gap-1.5 mb-1">
-                <AlertTriangle size={15} className="text-amber-400" />
-                <span>Flyback Diode Polarities:</span>
-              </div>
-              <div>
-                Each 1N5819 Schottky diode must have its cathode (silver ring) connected to VBAT (+) and its anode connected to the MOSFET drain. This safely shunts -35V inductive spikes away from the ESP32.
-              </div>
-            </div>
-          </div>
+        <div className="w-full h-full min-h-[640px]">
+          <UniversalElectronicWorkbench
+            machineId="esp32-drone"
+            theme={theme}
+            isEmbedded={true}
+          />
         </div>
       )}
 

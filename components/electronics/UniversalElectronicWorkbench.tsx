@@ -23,13 +23,15 @@ import BuyLinkButtons from "@/components/ui/BuyLinkButtons";
 interface UniversalElectronicWorkbenchProps {
   machineId: MachineId;
   theme?: AppTheme;
-  onClose: () => void;
+  onClose?: () => void;
+  isEmbedded?: boolean;
 }
 
 export default function UniversalElectronicWorkbench({
   machineId,
   theme = "dark",
   onClose,
+  isEmbedded = false,
 }: UniversalElectronicWorkbenchProps) {
   const isLight = theme === "light";
   const [activeTab, setActiveTab] = useState<"schematic" | "pinout" | "safety">("schematic");
@@ -47,33 +49,49 @@ export default function UniversalElectronicWorkbench({
       : data.wires.filter((w) => w.type === wireFilter);
 
   return (
-    <div className="absolute inset-0 z-30 flex flex-col bg-[#07090e]/95 backdrop-blur-xl text-white pointer-events-auto overflow-hidden animate-in fade-in duration-200">
+    <div
+      className={`${
+        isEmbedded
+          ? "w-full h-full min-h-[640px] flex flex-col pointer-events-auto overflow-hidden transition-colors"
+          : "absolute inset-0 z-30 flex flex-col backdrop-blur-xl pointer-events-auto overflow-hidden animate-in fade-in duration-200 transition-colors"
+      } ${isLight ? "bg-[#f8fafc]/95 text-slate-900" : "bg-[#07090e]/95 text-white"}`}
+    >
       {/* ================= TOP WORKBENCH CONTROL BAR ================= */}
-      <div className="px-4 sm:px-6 py-3 border-b border-white/10 bg-[#0a0d14]/90 flex flex-wrap items-center justify-between gap-3 shrink-0">
+      <div
+        className={`px-4 sm:px-6 py-3 border-b flex flex-wrap items-center justify-between gap-3 shrink-0 ${
+          isLight ? "border-slate-200 bg-white/90" : "border-white/10 bg-[#0a0d14]/90"
+        }`}
+      >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
+          <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-500 shadow-sm">
             <Zap size={18} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono tracking-wider uppercase text-amber-400 font-bold">
+              <span className="text-[10px] font-mono tracking-wider uppercase text-amber-500 font-bold">
                 ELECTRONIC ARCHITECTURE & SCHEMATICS
               </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             </div>
-            <h2 className="text-sm sm:text-base font-bold text-white tracking-tight">
+            <h2 className={`text-sm sm:text-base font-bold tracking-tight ${isLight ? "text-slate-900" : "text-white"}`}>
               {data.name}
             </h2>
           </div>
         </div>
 
         {/* Center: View Switcher Tabs */}
-        <div className="flex items-center p-1 rounded-xl bg-black/50 border border-white/10 text-xs font-mono">
+        <div
+          className={`flex items-center p-1 rounded-xl border text-xs font-mono ${
+            isLight ? "bg-slate-100 border-slate-200" : "bg-black/50 border-white/10"
+          }`}
+        >
           <button
             onClick={() => setActiveTab("schematic")}
             className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition cursor-pointer ${
               activeTab === "schematic"
                 ? "bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20"
+                : isLight
+                ? "text-slate-600 hover:text-slate-900"
                 : "text-neutral-400 hover:text-white"
             }`}
           >
@@ -86,6 +104,8 @@ export default function UniversalElectronicWorkbench({
             className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition cursor-pointer ${
               activeTab === "pinout"
                 ? "bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20"
+                : isLight
+                ? "text-slate-600 hover:text-slate-900"
                 : "text-neutral-400 hover:text-white"
             }`}
           >
@@ -98,6 +118,8 @@ export default function UniversalElectronicWorkbench({
             className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition cursor-pointer ${
               activeTab === "safety"
                 ? "bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20"
+                : isLight
+                ? "text-slate-600 hover:text-slate-900"
                 : "text-neutral-400 hover:text-white"
             }`}
           >
@@ -106,14 +128,20 @@ export default function UniversalElectronicWorkbench({
           </button>
         </div>
 
-        {/* Right: Exit Electronic Mode Button */}
-        <button
-          onClick={onClose}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/15 bg-white/5 hover:bg-white/15 text-xs font-mono text-neutral-300 hover:text-white transition cursor-pointer"
-        >
-          <X size={14} />
-          <span>Exit Electronic Mode</span>
-        </button>
+        {/* Right: Exit / Return Button */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono transition cursor-pointer ${
+              isLight
+                ? "border-slate-300 bg-white hover:bg-slate-100 text-slate-700 shadow-sm"
+                : "border-white/15 bg-white/5 hover:bg-white/15 text-neutral-300 hover:text-white"
+            }`}
+          >
+            <X size={14} />
+            <span>{isEmbedded ? "Back to 3D View" : "Exit Electronic Mode"}</span>
+          </button>
+        )}
       </div>
 
       {/* ================= MAIN CONTENT VIEWPORT ================= */}

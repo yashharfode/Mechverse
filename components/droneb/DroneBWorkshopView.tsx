@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { DRONE_B_SHOPPING_LIST, DRONE_B_ENGINEERING_SPECS } from "@/data/droneBSourcingData";
 import BuyLinkButtons from "@/components/ui/BuyLinkButtons";
+import UniversalElectronicWorkbench from "@/components/electronics/UniversalElectronicWorkbench";
 
 interface DroneBWorkshopViewProps {
   activePillar: "engineering" | "electronics" | "bom" | "guide";
@@ -120,95 +121,12 @@ export default function DroneBWorkshopView({
 
       {/* ================= 2. ELECTRONICS & WIRING ================= */}
       {activePillar === "electronics" && (
-        <div className="space-y-6">
-          <div className="p-6 rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-[#0e122b] via-[#090b1c] to-[#060812] space-y-2 shadow-2xl">
-            <div className="flex items-center gap-2 text-indigo-400 text-xs font-mono font-bold uppercase tracking-wider">
-              <Zap size={16} />
-              <span>Pixhawk 6C Avionics & High-Voltage Power Bus</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-white">
-              Industrial Wiring Schematics & Pinout Mapping
-            </h2>
-            <p className="text-xs sm:text-sm text-gray-300 max-w-3xl leading-relaxed">
-              Complete electrical interconnects linking the 6S 22.2V LiPo battery, Matek PDB-HEX power board, four 40A Opto-isolated ESCs, and the STM32H7 Pixhawk 6C autopilot.
-            </p>
-          </div>
-
-          {/* Pinout Table */}
-          <div className="overflow-x-auto rounded-xl border border-white/10">
-            <table className="w-full text-left text-xs text-gray-300">
-              <thead className="bg-white/5 text-gray-400 uppercase font-mono text-[10px]">
-                <tr>
-                  <th className="p-3">Component Pin</th>
-                  <th className="p-3">Pixhawk 6C Port</th>
-                  <th className="p-3">Signal Standard</th>
-                  <th className="p-3">Operating Rail</th>
-                  <th className="p-3">Description</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5 font-mono text-[11px]">
-                <tr className="hover:bg-white/5">
-                  <td className="p-3 text-indigo-400">ESC 1 (Front-Right)</td>
-                  <td className="p-3 font-bold text-white">MAIN OUT 1</td>
-                  <td className="p-3 text-emerald-400">DShot600 / PWM</td>
-                  <td className="p-3">3.3V Logic / Opto</td>
-                  <td className="p-3 font-sans">Controls Motor 1 (CCW) rotation</td>
-                </tr>
-                <tr className="hover:bg-white/5">
-                  <td className="p-3 text-indigo-400">ESC 2 (Front-Left)</td>
-                  <td className="p-3 font-bold text-white">MAIN OUT 2</td>
-                  <td className="p-3 text-emerald-400">DShot600 / PWM</td>
-                  <td className="p-3">3.3V Logic / Opto</td>
-                  <td className="p-3 font-sans">Controls Motor 2 (CW) rotation</td>
-                </tr>
-                <tr className="hover:bg-white/5">
-                  <td className="p-3 text-indigo-400">ESC 3 (Rear-Left)</td>
-                  <td className="p-3 font-bold text-white">MAIN OUT 3</td>
-                  <td className="p-3 text-emerald-400">DShot600 / PWM</td>
-                  <td className="p-3">3.3V Logic / Opto</td>
-                  <td className="p-3 font-sans">Controls Motor 3 (CCW) rotation</td>
-                </tr>
-                <tr className="hover:bg-white/5">
-                  <td className="p-3 text-indigo-400">ESC 4 (Rear-Right)</td>
-                  <td className="p-3 font-bold text-white">MAIN OUT 4</td>
-                  <td className="p-3 text-emerald-400">DShot600 / PWM</td>
-                  <td className="p-3">3.3V Logic / Opto</td>
-                  <td className="p-3 font-sans">Controls Motor 4 (CW) rotation</td>
-                </tr>
-                <tr className="hover:bg-white/5">
-                  <td className="p-3 text-sky-400">M9N GNSS Mast</td>
-                  <td className="p-3 font-bold text-white">GPS 1 / I2C 1</td>
-                  <td className="p-3 text-amber-300">UART 115200 + I2C</td>
-                  <td className="p-3">5.0V Regulated</td>
-                  <td className="p-3 font-sans">Multi-constellation GPS & external compass</td>
-                </tr>
-                <tr className="hover:bg-white/5">
-                  <td className="p-3 text-amber-400">915MHz Radio</td>
-                  <td className="p-3 font-bold text-white">TELEM 1</td>
-                  <td className="p-3 text-amber-300">MAVLink 57600</td>
-                  <td className="p-3">5.0V Regulated</td>
-                  <td className="p-3 font-sans">Long-range ground station telemetry</td>
-                </tr>
-                <tr className="hover:bg-white/5">
-                  <td className="p-3 text-rose-400">Matek PDB Shunt</td>
-                  <td className="p-3 font-bold text-white">POWER 1</td>
-                  <td className="p-3 text-purple-400">Analog V / I Sensor</td>
-                  <td className="p-3">5.3V Dual BEC</td>
-                  <td className="p-3 font-sans">Main pack voltage & current telemetry</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-950/20 flex items-start gap-3">
-            <AlertTriangle size={18} className="text-amber-400 shrink-0 mt-0.5" />
-            <div className="text-xs text-gray-300 space-y-1">
-              <span className="font-bold text-white block">High Voltage Caution (6S 22.2V LiPo)</span>
-              <p>
-                Always install an XT90-S (Anti-Spark) connector. Direct connection without spark suppression can weld contact pins and cause voltage transients that damage the flight controller.
-              </p>
-            </div>
-          </div>
+        <div className="w-full h-full min-h-[640px]">
+          <UniversalElectronicWorkbench
+            machineId="drone-b"
+            theme={theme as any}
+            isEmbedded={true}
+          />
         </div>
       )}
 
