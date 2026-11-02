@@ -877,9 +877,9 @@ export default function Home() {
             ) : (
               /* ================= 3D SIMULATOR VIEWPORT ================= */
               <div className="flex-1 relative w-full h-full overflow-hidden">
-                {/* Robo Rumble Mode Sub-Bar (Explorer / Arena / Track / Customizer / Compare) */}
+                {/* Robo Rumble Mode Sub-Bar (Explorer / Arena / Track / Customizer / Compare) - positioned cleanly below ControlsHeader so Exploded / View buttons are never hidden */}
                 {selectedMachineId === "robo-rumble" && (
-                  <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+                  <div className="absolute top-14 sm:top-16 left-1/2 -translate-x-1/2 z-20 pointer-events-auto">
                     <div className="flex items-center gap-1 bg-black/80 border border-white/15 p-1 rounded-2xl backdrop-blur-xl shadow-2xl">
                       {[
                         { id: "explorer", label: "3D CAD Explorer", icon: "🔍" },
@@ -1196,6 +1196,13 @@ export default function Home() {
                           onEnterArena={() => setRoboSimulatorMode("arena")}
                           onEnterTrack={() => setRoboSimulatorMode("track")}
                           onReset={() => setCameraResetCount((c) => c + 1)}
+                          onToggleExplode={() => {
+                            setViewMode("exploded");
+                            explosionAudio.playCinematicExplode(0.8);
+                            if (explosionLevel === 0) {
+                              setExplosionLevel(0.6);
+                            }
+                          }}
                         />
                       )}
 

@@ -115,19 +115,19 @@ function CameraController({
           break;
       }
     } else if (machineId === "robo-rumble") {
-      lookTarget.set(0, 0.25, 0);
+      lookTarget.set(0, -0.15, 0);
       switch (preset) {
         case "front":
-          targetPos.set(0, 0.6, 3.2);
+          targetPos.set(0, 0.25, 2.8);
           break;
         case "side":
-          targetPos.set(3.2, 0.6, 0);
+          targetPos.set(2.8, 0.25, 0);
           break;
         case "top":
-          targetPos.set(0, 4.0, 0.1);
+          targetPos.set(0, 3.4, 0.05);
           break;
         default:
-          targetPos.set(2.6, 1.6, 3.0);
+          targetPos.set(2.2, 1.1, 2.4);
           break;
       }
     } else if (machineId === "walking-robot") {
@@ -392,6 +392,7 @@ export default function SceneViewer({
               isolatedComponent={isolatedComponent}
               hiddenComponents={hiddenComponents}
               onSelect={onSelectComponent}
+              position={[0, -0.45, 0]}
             />
           )}
 

@@ -109,9 +109,19 @@ export default function RoboRumbleVehicleModel({
         roughness: 0.88,
         metalness: 0.05,
       }),
+      treadLug: new THREE.MeshStandardMaterial({
+        color: "#09090b",
+        roughness: 0.92,
+        metalness: 0.02,
+      }),
       rims: new THREE.MeshStandardMaterial({
         color: carId === "titan" ? "#0f172a" : "#f8fafc",
         roughness: 0.3,
+        metalness: 0.85,
+      }),
+      beadlockRing: new THREE.MeshStandardMaterial({
+        color: carId === "striker" ? "#ea580c" : carId === "viper" ? "#0284c7" : "#475569",
+        roughness: 0.25,
         metalness: 0.8,
       }),
       yellowMotor: new THREE.MeshStandardMaterial({
@@ -123,6 +133,11 @@ export default function RoboRumbleVehicleModel({
         color: "#64748b",
         roughness: 0.25,
         metalness: 0.9,
+      }),
+      motorBracket: new THREE.MeshStandardMaterial({
+        color: "#334155",
+        roughness: 0.3,
+        metalness: 0.8,
       }),
       pcbGreen: new THREE.MeshStandardMaterial({
         color: "#047857",
@@ -143,6 +158,35 @@ export default function RoboRumbleVehicleModel({
         color: "#e2e8f0",
         roughness: 0.2,
         metalness: 0.95,
+      }),
+      rollCage: new THREE.MeshStandardMaterial({
+        color: "#1e293b",
+        roughness: 0.25,
+        metalness: 0.85,
+      }),
+      weaponDrum: new THREE.MeshStandardMaterial({
+        color: "#334155",
+        roughness: 0.2,
+        metalness: 0.9,
+      }),
+      impactTeeth: new THREE.MeshStandardMaterial({
+        color: "#f59e0b",
+        roughness: 0.15,
+        metalness: 0.95,
+      }),
+      headlightLed: new THREE.MeshStandardMaterial({
+        color: "#38bdf8",
+        emissive: new THREE.Color("#38bdf8"),
+        emissiveIntensity: 1.8,
+        roughness: 0.1,
+        metalness: 0.5,
+      }),
+      statusLed: new THREE.MeshStandardMaterial({
+        color: "#10b981",
+        emissive: new THREE.Color("#10b981"),
+        emissiveIntensity: 1.5,
+        roughness: 0.1,
+        metalness: 0.5,
       }),
       highlight: new THREE.MeshStandardMaterial({
         color: "#38bdf8",
@@ -254,15 +298,24 @@ export default function RoboRumbleVehicleModel({
           position={[0, 0.16, 0]}
           onClick={(e) => handlePointer("chassis-frame", e)}
         >
-          {/* Main Flat Lower Structural Deck */}
+          {/* Main Flat Lower Structural Deck (7075-T6 Belly Pan) */}
           <mesh castShadow receiveShadow material={getMat("chassis-frame", materials.chassis)}>
             <boxGeometry args={[chassisScale.width, 0.04, chassisScale.length]} />
           </mesh>
 
-          {/* Lateral Stiffener Ribs */}
+          {/* Front Chamfered Skid Plate Lip */}
+          <mesh
+            position={[0, 0.015, chassisScale.length * 0.49]}
+            rotation={[0.35, 0, 0]}
+            material={materials.armorSteel}
+          >
+            <boxGeometry args={[chassisScale.width * 0.94, 0.03, 0.12]} />
+          </mesh>
+
+          {/* Lateral Stiffener Bulkhead Ribs */}
           {[-0.35, 0, 0.35].map((z) => (
             <mesh key={z} position={[0, 0.035, z]} material={materials.chassis}>
-              <boxGeometry args={[chassisScale.width * 0.9, 0.03, 0.04]} />
+              <boxGeometry args={[chassisScale.width * 0.88, 0.035, 0.04]} />
             </mesh>
           ))}
 
@@ -271,17 +324,47 @@ export default function RoboRumbleVehicleModel({
             <boxGeometry args={[chassisScale.width * 0.7, 0.14, chassisScale.length * 0.72]} />
           </mesh>
 
-          {/* Upper Top Deck Cover (Clear Polycarbonate / Colored Armor) */}
+          {/* Upper Top Deck Cover (Colored Armor / Carbon Finish) */}
           <mesh
             position={[0, 0.2 + explosionLevel * 0.55, 0]}
             material={getMat("chassis-frame", materials.body)}
           >
-            <boxGeometry args={[chassisScale.width * 0.72, 0.02, chassisScale.length * 0.74]} />
+            <boxGeometry args={[chassisScale.width * 0.72, 0.025, chassisScale.length * 0.74]} />
           </mesh>
+
+          {/* Dual Tubular Steel Roll Cage Protection Bars (Over Electronics) */}
+          {[-chassisScale.width * 0.28, chassisScale.width * 0.28].map((rx) => (
+            <group key={rx} position={[rx, 0.22 + explosionLevel * 0.55, 0]}>
+              {/* Longitudinal Tube */}
+              <mesh position={[0, 0.11, 0]} rotation={[Math.PI / 2, 0, 0]} material={materials.rollCage}>
+                <cylinderGeometry args={[0.018, 0.018, chassisScale.length * 0.68, 12]} />
+              </mesh>
+              {/* Front Down-Tube Stanchion */}
+              <mesh position={[0, 0.05, chassisScale.length * 0.32]} rotation={[-0.3, 0, 0]} material={materials.rollCage}>
+                <cylinderGeometry args={[0.016, 0.016, 0.13, 12]} />
+              </mesh>
+              {/* Rear Down-Tube Stanchion */}
+              <mesh position={[0, 0.05, -chassisScale.length * 0.32]} rotation={[0.3, 0, 0]} material={materials.rollCage}>
+                <cylinderGeometry args={[0.016, 0.016, 0.13, 12]} />
+              </mesh>
+            </group>
+          ))}
+
+          {/* Crossbar connecting both roll bars */}
+          <mesh position={[0, 0.33 + explosionLevel * 0.55, 0]} rotation={[0, 0, Math.PI / 2]} material={materials.rollCage}>
+            <cylinderGeometry args={[0.016, 0.016, chassisScale.width * 0.56, 12]} />
+          </mesh>
+
+          {/* Forward-Facing Dual Tactical LED Headlights */}
+          {[-chassisScale.width * 0.26, chassisScale.width * 0.26].map((hx) => (
+            <mesh key={hx} position={[hx, 0.18, chassisScale.length * 0.38]} material={materials.headlightLed}>
+              <boxGeometry args={[0.06, 0.04, 0.02]} />
+            </mesh>
+          ))}
         </group>
       )}
 
-      {/* ================= 2. FRONT ATTACHMENT (WEDGE / RAM / DEFLECTOR) ================= */}
+      {/* ================= 2. FRONT ATTACHMENT (WEDGE / RAM / WEAPONS) ================= */}
       {isVisible("front-attachment") && (
         <group
           ref={frontWedgeRef}
@@ -289,7 +372,7 @@ export default function RoboRumbleVehicleModel({
           onClick={(e) => handlePointer("front-attachment", e)}
         >
           {carId === "striker" && (
-            /* STRIKER: Sloped Low-Profile Combat Wedge Blade */
+            /* STRIKER: Sloped Low-Profile Combat Wedge Blade with Ground Teeth & Kinetic Drum */
             <group position={[0, -0.04, 0.12]}>
               {/* Sloped Wedge Face (14° Incline) */}
               <mesh
@@ -303,17 +386,41 @@ export default function RoboRumbleVehicleModel({
               <mesh position={[0, -0.08, 0.18]} material={materials.hardenedWedge}>
                 <boxGeometry args={[chassisScale.width * 1.02, 0.02, 0.06]} />
               </mesh>
-              {/* Gusset Support Brackets */}
+              {/* Ground-Scraping Serrated Wedge Teeth (4x Titanium Tines) */}
+              {[-0.45, -0.15, 0.15, 0.45].map((tx) => (
+                <mesh key={tx} position={[tx, -0.085, 0.23]} rotation={[-0.2, 0, 0]} material={materials.impactTeeth}>
+                  <boxGeometry args={[0.05, 0.015, 0.09]} />
+                </mesh>
+              ))}
+              {/* Gusset Support Brackets with Lightening Holes */}
               {[-0.4, 0.4].map((x) => (
                 <mesh key={x} position={[x, -0.02, 0]} material={materials.armorSteel}>
                   <boxGeometry args={[0.03, 0.12, 0.28]} />
                 </mesh>
               ))}
+              {/* Center Kinetic Spinning Weapon Drum (High-Torque Flywheel) */}
+              <group position={[0, 0.08, 0.02]}>
+                <mesh rotation={[0, 0, Math.PI / 2]} material={materials.weaponDrum}>
+                  <cylinderGeometry args={[0.085, 0.085, chassisScale.width * 0.38, 20]} />
+                </mesh>
+                {/* Dual Hardened Impact Teeth on Drum */}
+                {[-0.1, 0.1].map((dx) => (
+                  <mesh key={dx} position={[dx, 0.075, 0]} material={materials.impactTeeth}>
+                    <boxGeometry args={[0.04, 0.06, 0.05]} />
+                  </mesh>
+                ))}
+                {/* Drum Side Aluminum Support Towers */}
+                {[-chassisScale.width * 0.21, chassisScale.width * 0.21].map((sx) => (
+                  <mesh key={sx} position={[sx, -0.04, 0]} material={materials.armorSteel}>
+                    <boxGeometry args={[0.025, 0.16, 0.14]} />
+                  </mesh>
+                ))}
+              </group>
             </group>
           )}
 
           {carId === "titan" && (
-            /* TITAN: Dual-Tier Armored Steel Ram Bumper */
+            /* TITAN: Dual-Tier Armored Steel Ram Bumper with Anti-Spinner Horns */
             <group position={[0, 0.04, 0.15]}>
               {/* Upper Heavy Impact Beam */}
               <mesh castShadow material={getMat("front-attachment", materials.armorSteel)}>
@@ -323,6 +430,12 @@ export default function RoboRumbleVehicleModel({
               <mesh position={[0, -0.1, 0.06]} material={materials.hardenedWedge}>
                 <boxGeometry args={[chassisScale.width * 1.05, 0.08, 0.12]} />
               </mesh>
+              {/* Dual Vertical Anti-Spinner Heavy Horns */}
+              {[-0.38, 0.38].map((hx) => (
+                <mesh key={hx} position={[hx, 0.14, 0.04]} rotation={[0.2, 0, 0]} material={materials.hardenedWedge}>
+                  <boxGeometry args={[0.06, 0.18, 0.06]} />
+                </mesh>
+              ))}
               {/* Neoprene Shock Buffer Blocks */}
               {[-0.45, 0, 0.45].map((x) => (
                 <mesh key={x} position={[x, 0, 0.1]} material={materials.rubberTire}>
@@ -345,6 +458,12 @@ export default function RoboRumbleVehicleModel({
               <mesh position={[0, -0.06, 0.15]} material={materials.hardenedWedge}>
                 <boxGeometry args={[chassisScale.width * 0.82, 0.025, 0.08]} />
               </mesh>
+              {/* Dual Front Titanium Scrape Forks */}
+              {[-0.24, 0.24].map((fx) => (
+                <mesh key={fx} position={[fx, -0.07, 0.22]} rotation={[-0.15, 0, 0]} material={materials.impactTeeth}>
+                  <boxGeometry args={[0.035, 0.015, 0.12]} />
+                </mesh>
+              ))}
             </group>
           )}
         </group>
@@ -441,6 +560,10 @@ export default function RoboRumbleVehicleModel({
           {[-wheelBaseZ, wheelBaseZ].map((z) =>
             [-1, 1].map((dir) => (
               <group key={`${z}-${dir}`} position={[dir * (chassisScale.width * 0.35), 0, z]}>
+                {/* CNC Clamping Aluminum Motor Mount Bracket */}
+                <mesh position={[0, -0.01, 0]} material={materials.motorBracket}>
+                  <boxGeometry args={[0.28, 0.04, 0.20]} />
+                </mesh>
                 {/* Yellow Gearbox Box */}
                 <mesh
                   castShadow
@@ -456,13 +579,13 @@ export default function RoboRumbleVehicleModel({
                 >
                   <cylinderGeometry args={[0.055, 0.055, 0.16, 16]} />
                 </mesh>
-                {/* Motor Shaft Coupler */}
+                {/* Heavy Duty Motor Shaft Coupler & Hex Hub */}
                 <mesh
                   position={[dir * 0.16, 0, 0]}
                   rotation={[0, 0, Math.PI / 2]}
                   material={materials.hardware}
                 >
-                  <cylinderGeometry args={[0.025, 0.025, 0.1, 12]} />
+                  <cylinderGeometry args={[0.028, 0.028, 0.1, 12]} />
                 </mesh>
               </group>
             ))
@@ -478,43 +601,96 @@ export default function RoboRumbleVehicleModel({
           onClick={(e) => handlePointer("wheels-assembly", e)}
         >
           {[-wheelBaseZ, wheelBaseZ].map((z) =>
-            [-trackX, trackX].map((x) => (
-              <group
-                key={`${z}-${x}`}
-                position={[x + Math.sign(x) * explosionLevel * 0.65, 0, z]}
-                rotation={[wheelAngleRef.current, 0, 0]}
-              >
-                {/* Outer Rubber Combat Tire */}
-                <mesh
-                  rotation={[0, 0, Math.PI / 2]}
-                  castShadow
-                  material={getMat("wheels-assembly", materials.rubberTire)}
+            [-trackX, trackX].map((x) => {
+              const isRight = x > 0;
+              return (
+                <group
+                  key={`${z}-${x}`}
+                  position={[x + Math.sign(x) * explosionLevel * 0.65, 0, z]}
+                  rotation={[wheelAngleRef.current, 0, 0]}
                 >
-                  <cylinderGeometry
-                    args={[wheelRadius, wheelRadius, wheelThickness, 24]}
-                  />
-                </mesh>
+                  {/* Outer Rubber Combat Tire */}
+                  <mesh
+                    rotation={[0, 0, Math.PI / 2]}
+                    castShadow
+                    material={getMat("wheels-assembly", materials.rubberTire)}
+                  >
+                    <cylinderGeometry
+                      args={[wheelRadius, wheelRadius, wheelThickness, 32]}
+                    />
+                  </mesh>
 
-                {/* Inner Forged Rim */}
-                <mesh
-                  rotation={[0, 0, Math.PI / 2]}
-                  material={materials.rims}
-                >
-                  <cylinderGeometry
-                    args={[wheelRadius * 0.68, wheelRadius * 0.68, wheelThickness + 0.01, 16]}
-                  />
-                </mesh>
+                  {/* High-Traction Radial Chevron Tread Lugs (14 lugs around circumference) */}
+                  {Array.from({ length: 14 }).map((_, i) => {
+                    const angle = (i / 14) * Math.PI * 2;
+                    return (
+                      <mesh
+                        key={i}
+                        position={[
+                          0,
+                          Math.sin(angle) * (wheelRadius + 0.008),
+                          Math.cos(angle) * (wheelRadius + 0.008),
+                        ]}
+                        rotation={[angle, 0, 0]}
+                        material={materials.treadLug}
+                      >
+                        <boxGeometry args={[wheelThickness * 0.94, 0.016, 0.035]} />
+                      </mesh>
+                    );
+                  })}
 
-                {/* Center Wheel Nut */}
-                <mesh
-                  position={[x > 0 ? wheelThickness / 2 + 0.02 : -wheelThickness / 2 - 0.02, 0, 0]}
-                  rotation={[0, 0, Math.PI / 2]}
-                  material={materials.hardware}
-                >
-                  <cylinderGeometry args={[0.04, 0.04, 0.03, 6]} />
-                </mesh>
-              </group>
-            ))
+                  {/* CNC Deep-Dish Billet Aluminum Rim */}
+                  <mesh
+                    rotation={[0, 0, Math.PI / 2]}
+                    material={materials.rims}
+                  >
+                    <cylinderGeometry
+                      args={[wheelRadius * 0.72, wheelRadius * 0.72, wheelThickness + 0.006, 24]}
+                    />
+                  </mesh>
+
+                  {/* Outer Anodized Beadlock Ring */}
+                  <mesh
+                    position={[isRight ? wheelThickness / 2 + 0.006 : -wheelThickness / 2 - 0.006, 0, 0]}
+                    rotation={[0, 0, Math.PI / 2]}
+                    material={materials.beadlockRing}
+                  >
+                    <cylinderGeometry
+                      args={[wheelRadius * 0.74, wheelRadius * 0.74, 0.008, 24]}
+                    />
+                  </mesh>
+
+                  {/* Perimeter Beadlock Stud Bolts (8x studs) */}
+                  {Array.from({ length: 8 }).map((_, bi) => {
+                    const bAngle = (bi / 8) * Math.PI * 2;
+                    const r = wheelRadius * 0.63;
+                    return (
+                      <mesh
+                        key={bi}
+                        position={[
+                          isRight ? wheelThickness / 2 + 0.012 : -wheelThickness / 2 - 0.012,
+                          Math.sin(bAngle) * r,
+                          Math.cos(bAngle) * r,
+                        ]}
+                        rotation={[0, 0, Math.PI / 2]}
+                        material={materials.hardware}
+                      >
+                        <cylinderGeometry args={[0.012, 0.012, 0.008, 8]} />
+                      </mesh>
+                    );
+                  })}
+
+                  {/* Anodized Hex Wheel Nut with Steel Spindle Pin */}
+                  <mesh
+                    position={[isRight ? wheelThickness / 2 + 0.022 : -wheelThickness / 2 - 0.022, 0, 0]}
+                    rotation={[0, 0, Math.PI / 2]}
+                    material={materials.hardware}
+                  >
+                    <cylinderGeometry args={[0.045, 0.045, 0.03, 6]} />
+                  </mesh>
+                </group>
+              );
+            })
           )}
         </group>
       )}

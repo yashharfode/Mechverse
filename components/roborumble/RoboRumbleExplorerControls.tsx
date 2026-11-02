@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Shield, Zap, Wind, Swords, Flag, RotateCcw } from "lucide-react";
+import { Shield, Zap, Wind, Swords, Flag, RotateCcw, Layers } from "lucide-react";
 import { BattleCarId } from "@/types/machine";
 import { BATTLE_CARS_SPEC } from "@/data/roboRumbleData";
 
@@ -11,6 +11,7 @@ interface RoboRumbleExplorerControlsProps {
   onEnterArena: () => void;
   onEnterTrack?: () => void;
   onReset: () => void;
+  onToggleExplode?: () => void;
 }
 
 export default function RoboRumbleExplorerControls({
@@ -19,6 +20,7 @@ export default function RoboRumbleExplorerControls({
   onEnterArena,
   onEnterTrack,
   onReset,
+  onToggleExplode,
 }: RoboRumbleExplorerControlsProps) {
   const currentSpec = BATTLE_CARS_SPEC[selectedCarId] || BATTLE_CARS_SPEC.striker;
 
@@ -78,8 +80,19 @@ export default function RoboRumbleExplorerControls({
             </div>
           </div>
 
-          {/* Quick Launch Buttons: Arena & Track */}
+          {/* Quick Launch Buttons: Explode, Arena & Track */}
           <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+            {onToggleExplode && (
+              <button
+                onClick={onToggleExplode}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-600/20 hover:bg-red-600/35 border border-red-500/40 text-red-300 hover:text-white font-bold text-xs transition hover:scale-[1.02] cursor-pointer"
+                title="Switch to Exploded 3D Assembly View"
+              >
+                <Layers size={13} className="text-red-400" />
+                <span>Explode</span>
+              </button>
+            )}
+
             {onEnterTrack && (
               <button
                 onClick={onEnterTrack}
