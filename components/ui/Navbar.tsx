@@ -23,6 +23,8 @@ import {
   Wrench,
   Grid,
   Cable,
+  X,
+  ExternalLink,
 } from "lucide-react";
 import { MachineId, AppTheme } from "@/types/machine";
 
@@ -46,6 +48,8 @@ interface ProjectLibraryItem {
   badge: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
   accentColor: string;
+  imageUrl: string;
+  specs: string;
 }
 
 const PROJECT_LIBRARY: ProjectLibraryItem[] = [
@@ -56,6 +60,8 @@ const PROJECT_LIBRARY: ProjectLibraryItem[] = [
     badge: "₹2,888",
     icon: Crosshair,
     accentColor: "from-orange-500 to-amber-500",
+    imageUrl: "/images/models/robo-racer.jpg",
+    specs: "ESP32 Rover • Dual N20 • LiDAR CAD",
   },
   {
     id: "esp32-drone",
@@ -64,6 +70,8 @@ const PROJECT_LIBRARY: ProjectLibraryItem[] = [
     badge: "₹1,955",
     icon: Smartphone,
     accentColor: "from-amber-500 to-orange-500",
+    imageUrl: "/images/models/esp32-drone.jpg",
+    specs: "56g Nano Quad • ESP32 SoftAP • 8520 Coreless",
   },
   {
     id: "drone-b",
@@ -72,6 +80,8 @@ const PROJECT_LIBRARY: ProjectLibraryItem[] = [
     badge: "CAD ASSET",
     icon: Hexagon,
     accentColor: "from-indigo-500 to-purple-500",
+    imageUrl: "/images/models/drone-b.jpg",
+    specs: "Coaxial Carbon Hull • 400Hz Flight Avionics",
   },
   {
     id: "aero-450",
@@ -80,6 +90,8 @@ const PROJECT_LIBRARY: ProjectLibraryItem[] = [
     badge: "APM 2.8",
     icon: Plane,
     accentColor: "from-emerald-500 to-teal-500",
+    imageUrl: "/images/models/aero-450.jpg",
+    specs: "APM 2.8 / Pixhawk • 2212 920KV • 3S 2200mAh",
   },
   {
     id: "robo-rumble",
@@ -88,6 +100,8 @@ const PROJECT_LIBRARY: ProjectLibraryItem[] = [
     badge: "4WD ARENA",
     icon: Swords,
     accentColor: "from-rose-500 to-red-600",
+    imageUrl: "/images/models/robo-rumble.jpg",
+    specs: "1.5kg Beetleweight • 4WD Ramp • Impact Ready",
   },
   {
     id: "sports-car",
@@ -96,6 +110,8 @@ const PROJECT_LIBRARY: ProjectLibraryItem[] = [
     badge: "AUTOMOTIVE",
     icon: CarFront,
     accentColor: "from-red-600 to-orange-600",
+    imageUrl: "/images/models/sports-car.jpg",
+    specs: "Twin-Turbo V6 • Carbon Chassis • Aero Diffuser",
   },
   {
     id: "walking-robot",
@@ -104,6 +120,8 @@ const PROJECT_LIBRARY: ProjectLibraryItem[] = [
     badge: "BIOMIMETIC",
     icon: Bot,
     accentColor: "from-yellow-500 to-amber-600",
+    imageUrl: "/images/models/walking-robot.jpg",
+    specs: "Theo Jansen 8-Leg Mechanism • 3V DC Geared",
   },
   {
     id: "electric-fan",
@@ -112,6 +130,8 @@ const PROJECT_LIBRARY: ProjectLibraryItem[] = [
     badge: "FLUID DYNAMICS",
     icon: Fan,
     accentColor: "from-sky-500 to-blue-600",
+    imageUrl: "/images/models/electric-fan.jpg",
+    specs: "3-Blade Aero Rotor • 3-Speed AC Induction Motor",
   },
   {
     id: "ropeway-robot",
@@ -120,6 +140,8 @@ const PROJECT_LIBRARY: ProjectLibraryItem[] = [
     badge: "ROPEWAY CAD",
     icon: Cable,
     accentColor: "from-sky-500 to-indigo-600",
+    imageUrl: "/images/models/ropeway-robot.jpg",
+    specs: "Moving Arms • Cable Inspection • 12V 100RPM Geared",
   },
 ];
 
@@ -137,6 +159,7 @@ export default function Navbar({
 }: NavbarProps) {
   const isLight = theme === "light";
   const [isProjectsOpen, setIsProjectsOpen] = useState<boolean>(false);
+  const [isCatalogModalOpen, setIsCatalogModalOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Active Project Data
@@ -156,7 +179,8 @@ export default function Navbar({
   }, []);
 
   return (
-    <header
+    <>
+      <header
       className={`h-14 sm:h-16 px-3 sm:px-6 flex items-center justify-between sticky top-0 z-50 transition-colors duration-300 backdrop-blur-md ${
         isLight
           ? "bg-white/95 border-b border-gray-200 shadow-sm"
@@ -196,7 +220,7 @@ export default function Navbar({
         </button>
 
         {/* ================= PROJECTS / LIBRARY DROPDOWN TRIGGER ================= */}
-        <div ref={dropdownRef} className="relative">
+        <div ref={dropdownRef} className="relative flex items-center gap-1.5 sm:gap-2">
           <button
             onClick={() => setIsProjectsOpen((prev) => !prev)}
             aria-expanded={isProjectsOpen}
@@ -229,10 +253,27 @@ export default function Navbar({
             />
           </button>
 
+          {/* ================= VIEW CATALOG QUICK-LAUNCH BUTTON ================= */}
+          <button
+            onClick={() => setIsCatalogModalOpen(true)}
+            title="View Visual Catalog of all 9 Models with Images & Specifications"
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border transition shadow-sm cursor-pointer text-xs font-bold ${
+              isLight
+                ? "bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-800"
+                : "bg-white/5 hover:bg-white/10 border-white/15 text-white"
+            }`}
+          >
+            <Grid size={13} className="text-orange-400 shrink-0" />
+            <span className="hidden md:inline">View Catalog</span>
+            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-orange-500/20 text-orange-400 font-bold border border-orange-500/30">
+              9
+            </span>
+          </button>
+
           {/* ================= CONSOLIDATED PROJECTS DROPDOWN MENU (100% OPAQUE SOLID HIGH-CONTRAST) ================= */}
           {isProjectsOpen && (
             <div
-              className={`absolute left-0 mt-2 w-80 sm:w-96 rounded-2xl border p-2.5 z-[9999] animate-in fade-in slide-in-from-top-2 duration-150 ${
+              className={`absolute left-0 top-full mt-2 w-80 sm:w-96 rounded-2xl border p-2.5 z-[9999] animate-in fade-in slide-in-from-top-2 duration-150 ${
                 isLight
                   ? "bg-white border-slate-300 shadow-[0_25px_60px_rgba(0,0,0,0.2)] text-slate-900"
                   : "bg-[#0d111a] border-slate-700 shadow-[0_30px_70px_rgba(0,0,0,0.95)] text-white"
@@ -247,12 +288,19 @@ export default function Navbar({
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   <span className="text-[10px] font-mono uppercase tracking-wider font-bold text-gray-400">
-                    Project Library (8 Machines)
+                    Project Library (9 Machines)
                   </span>
                 </div>
-                <span className="text-[10px] font-mono text-orange-400 font-bold bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/20">
-                  Select Model
-                </span>
+                <button
+                  onClick={() => {
+                    setIsCatalogModalOpen(true);
+                    setIsProjectsOpen(false);
+                  }}
+                  className="text-[10px] font-mono text-orange-400 hover:text-orange-300 font-bold bg-orange-500/10 hover:bg-orange-500/20 px-2 py-0.5 rounded border border-orange-500/20 transition flex items-center gap-1 cursor-pointer"
+                >
+                  <Grid size={10} />
+                  <span>Grid View</span>
+                </button>
               </div>
 
               {/* Machine Items List */}
@@ -278,21 +326,20 @@ export default function Navbar({
                           : "bg-[#151926] hover:bg-[#1e2538] border-slate-800 hover:border-orange-500/40 text-slate-100"
                       }`}
                     >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div
-                          className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition ${
-                            isSelected
-                              ? "bg-orange-500 text-black shadow-md shadow-orange-500/30"
-                              : isLight
-                              ? "bg-white text-slate-700 border border-slate-200"
-                              : "bg-[#0b0e17] text-slate-200 border border-slate-700 group-hover:border-orange-500/40"
-                          }`}
-                        >
-                          <ItemIcon size={16} />
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        {/* Visual Thumbnail */}
+                        <div className="w-10 h-10 rounded-lg overflow-hidden border border-white/10 shrink-0 bg-black/40 relative">
+                          <img
+                            src={item.imageUrl}
+                            alt={item.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                            loading="lazy"
+                          />
                         </div>
+
                         <div className="min-w-0 space-y-0.5">
                           <div className="flex items-center gap-1.5">
-                            <span className="text-xs font-bold truncate block text-white group-hover:text-orange-400 transition">
+                            <span className="text-xs font-bold truncate block group-hover:text-orange-400 transition">
                               {item.name}
                             </span>
                             <span
@@ -338,7 +385,7 @@ export default function Navbar({
               >
                 <button
                   onClick={() => {
-                    setCurrentTab("home");
+                    setIsCatalogModalOpen(true);
                     setIsProjectsOpen(false);
                   }}
                   className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer border ${
@@ -348,7 +395,7 @@ export default function Navbar({
                   }`}
                 >
                   <Grid size={13} className="text-orange-400" />
-                  <span>Full Catalog</span>
+                  <span>Visual Catalog</span>
                 </button>
 
                 <button
@@ -447,5 +494,165 @@ export default function Navbar({
         )}
       </div>
     </header>
+
+    {/* ================= VISUAL MODEL CATALOG MODAL (ALL 9 MACHINES WITH IMAGES & SPECS) ================= */}
+    {isCatalogModalOpen && (
+      <div
+        className="fixed inset-0 z-[10000] bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200"
+        onClick={() => setIsCatalogModalOpen(false)}
+      >
+        <div
+          className={`relative w-full max-w-5xl rounded-3xl border shadow-2xl my-auto max-h-[92vh] flex flex-col overflow-hidden ${
+            isLight
+              ? "bg-white border-slate-300 text-slate-900 shadow-slate-900/20"
+              : "bg-[#0b0f19] border-white/15 text-white shadow-black/80"
+          }`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Modal Header */}
+          <div
+            className={`p-4 sm:p-6 border-b flex items-center justify-between shrink-0 ${
+              isLight ? "border-slate-200 bg-slate-50/80" : "border-white/10 bg-[#070a12]/80"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-orange-500 shadow-md">
+                <Grid size={20} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base sm:text-lg font-black tracking-wide uppercase">
+                    3D Machine Catalog
+                  </h2>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-orange-500/15 text-orange-400 font-bold border border-orange-500/30">
+                    9 CAD Models
+                  </span>
+                </div>
+                <p className={`text-xs ${isLight ? "text-slate-500" : "text-slate-400"}`}>
+                  Select any machine below to inspect in interactive 3D, exploded view, and circuit schematics
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setIsCatalogModalOpen(false)}
+              className={`p-2 rounded-xl border transition cursor-pointer ${
+                isLight
+                  ? "bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-600 hover:text-slate-900"
+                  : "bg-white/5 hover:bg-white/10 border-white/10 text-gray-400 hover:text-white"
+              }`}
+              title="Close Catalog"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* Modal Body - 9 Machine Cards Grid */}
+          <div className="p-4 sm:p-6 overflow-y-auto custom-scrollbar flex-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {PROJECT_LIBRARY.map((item) => {
+                const ItemIcon = item.icon;
+                const isSelected = selectedMachineId === item.id;
+
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => {
+                      onSelectMachine(item.id);
+                      setCurrentTab("explore");
+                      setIsCatalogModalOpen(false);
+                    }}
+                    className={`group relative rounded-2xl border p-3.5 transition-all duration-300 cursor-pointer flex flex-col justify-between overflow-hidden ${
+                      isSelected
+                        ? "border-orange-500 bg-orange-500/[0.08] shadow-lg shadow-orange-500/10 ring-1 ring-orange-500"
+                        : isLight
+                        ? "bg-slate-50 hover:bg-white border-slate-200 hover:border-orange-500/60 shadow-sm hover:shadow-md"
+                        : "bg-[#101422] hover:bg-[#161c2e] border-white/10 hover:border-orange-500/50 shadow-md"
+                    }`}
+                  >
+                    {/* Image Preview with Hover Zoom */}
+                    <div className="w-full h-36 rounded-xl overflow-hidden bg-black/40 border border-white/10 relative shrink-0">
+                      <img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      {/* Top Badges */}
+                      <div className="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none">
+                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-black/80 text-orange-400 border border-orange-500/30 backdrop-blur-sm">
+                          {item.badge}
+                        </span>
+                        {isSelected && (
+                          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-emerald-500 text-black shadow-md flex items-center gap-1">
+                            <Check size={10} className="stroke-[3]" /> Active
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Metadata Content */}
+                    <div className="pt-3 flex-1 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <div className="w-4 h-4 rounded bg-orange-500/20 text-orange-400 flex items-center justify-center shrink-0">
+                            <ItemIcon size={10} />
+                          </div>
+                          <h3 className="text-sm font-bold text-white group-hover:text-orange-400 transition truncate">
+                            {item.name}
+                          </h3>
+                        </div>
+
+                        <p className={`text-[11px] leading-tight font-medium ${isLight ? "text-slate-600" : "text-slate-300"}`}>
+                          {item.category}
+                        </p>
+
+                        <p className={`text-[10px] font-mono mt-2 pt-2 border-t leading-relaxed ${
+                          isLight ? "text-slate-500 border-slate-200" : "text-slate-400 border-white/10"
+                        }`}>
+                          {item.specs}
+                        </p>
+                      </div>
+
+                      {/* Launch Action */}
+                      <div className="pt-3 mt-2 flex items-center justify-between border-t border-dashed border-white/10">
+                        <span className={`text-[10px] font-mono uppercase tracking-wider ${
+                          isSelected ? "text-emerald-400 font-bold" : isLight ? "text-slate-500" : "text-slate-400"
+                        }`}>
+                          {isSelected ? "Currently Loaded" : "Click to Inspect"}
+                        </span>
+                        <div className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 ${
+                          isSelected
+                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                            : "bg-orange-500 text-white group-hover:brightness-110 shadow-sm"
+                        }`}>
+                          <span>{isSelected ? "In Studio" : "Launch"}</span>
+                          <span className="text-[10px]">→</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Modal Footer */}
+          <div
+            className={`p-3 sm:p-4 border-t flex items-center justify-between shrink-0 text-xs font-mono ${
+              isLight ? "border-slate-200 bg-slate-50 text-slate-600" : "border-white/10 bg-[#070a12] text-slate-400"
+            }`}
+          >
+            <span>All models include full 3D interactive inspection, explosion & BOM</span>
+            <button
+              onClick={() => setIsCatalogModalOpen(false)}
+              className="px-4 py-1.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition cursor-pointer"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+  </>
   );
 }
