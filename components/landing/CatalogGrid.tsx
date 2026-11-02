@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Plus, CheckCircle2, X } from "lucide-react";
 import { AppTheme, MachineId } from "@/types/machine";
 import { TOKENS } from "@/constants/designTokens";
+import { isModelVisible } from "@/constants/modelVisibility";
 import MachineCard, { CatalogMachineItem } from "./MachineCard";
 import Quick3DModal from "./Quick3DModal";
 
@@ -197,8 +198,9 @@ export default function CatalogGrid({ onLaunchStudio, onOpenAR, theme = "dark" }
   const [requestText, setRequestText] = useState<string>("");
   const [requestSubmitted, setRequestSubmitted] = useState<boolean>(false);
 
+  const visibleCatalogItems = CATALOG_ITEMS.filter((item) => isModelVisible(item.id));
   const filteredItems =
-    filter === "all" ? CATALOG_ITEMS : CATALOG_ITEMS.filter((item) => item.category === filter);
+    filter === "all" ? visibleCatalogItems : visibleCatalogItems.filter((item) => item.category === filter);
 
   const categories = [
     { id: "all" as CategoryFilter, label: "All Machines" },

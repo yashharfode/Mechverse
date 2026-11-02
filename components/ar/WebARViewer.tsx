@@ -21,6 +21,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { CustomizationSettings, MachineId } from "@/types/machine";
+import { isModelVisible } from "@/constants/modelVisibility";
 import WebARModelRenderer from "./WebARModelRenderer";
 
 interface WebARViewerProps {
@@ -401,7 +402,7 @@ export default function WebARViewer({
         {/* Model Selection Carousel Pill */}
         <div className="max-w-[94vw] overflow-x-auto no-scrollbar">
           <div className="flex items-center gap-1.5 p-1.5 rounded-full bg-black/85 border border-white/20 backdrop-blur-2xl shadow-2xl">
-            {AR_MACHINES.map((m) => {
+            {AR_MACHINES.filter((m) => isModelVisible(m.id)).map((m) => {
               const isSelected = machineId === m.id;
               return (
                 <button

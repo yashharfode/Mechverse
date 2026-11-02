@@ -6,44 +6,40 @@ import {
   Cpu,
   Radio,
   Compass,
-  RotateCw,
-  RotateCcw,
-  CheckCircle2,
-  ShieldAlert,
-  Sliders,
-  Cable,
-  Eye,
-  Activity,
   Layers,
+  Activity,
+  Maximize2,
+  ZoomIn,
+  ZoomOut,
+  Crosshair,
+  Package,
+  Clock,
+  Settings,
+  Info,
+  CheckCircle2,
+  ExternalLink,
+  ChevronRight,
+  Shield,
+  Eye,
+  Camera,
 } from "lucide-react";
+import BuyLinkButtons from "@/components/ui/BuyLinkButtons";
 
 interface DroneBElectronicsWiringProps {
   theme?: "dark" | "light";
   onClose?: () => void;
 }
 
-type WiringFilter = "all" | "power" | "avionics" | "dshot" | "motors" | "telemetry";
+type WiringFilter = "all" | "power" | "dshot" | "phases" | "telemetry" | "aux";
 
-interface MotorCoaxialSpec {
-  id: number;
-  arm: string;
-  position: "Top" | "Bottom";
-  rotation: "CW" | "CCW";
-  pixhawkPin: string;
-  escName: string;
-  color: string;
+interface SelectedComponentInfo {
+  title: string;
+  category: string;
+  spec: string;
+  description: string;
+  pins: string[];
+  voltage: string;
 }
-
-const COAXIAL_MOTORS: MotorCoaxialSpec[] = [
-  { id: 1, arm: "Arm 1 (Front-Right)", position: "Top", rotation: "CW", pixhawkPin: "MAIN 1", escName: "ESC 1 (40A)", color: "#f97316" },
-  { id: 2, arm: "Arm 1 (Front-Right)", position: "Bottom", rotation: "CCW", pixhawkPin: "MAIN 2", escName: "ESC 2 (40A)", color: "#06b6d4" },
-  { id: 3, arm: "Arm 2 (Front-Left)", position: "Top", rotation: "CCW", pixhawkPin: "MAIN 3", escName: "ESC 3 (40A)", color: "#06b6d4" },
-  { id: 4, arm: "Arm 2 (Front-Left)", position: "Bottom", rotation: "CW", pixhawkPin: "MAIN 4", escName: "ESC 4 (40A)", color: "#f97316" },
-  { id: 5, arm: "Arm 3 (Rear-Left)", position: "Top", rotation: "CW", pixhawkPin: "MAIN 5", escName: "ESC 5 (40A)", color: "#f97316" },
-  { id: 6, arm: "Arm 3 (Rear-Left)", position: "Bottom", rotation: "CCW", pixhawkPin: "MAIN 6", escName: "ESC 6 (40A)", color: "#06b6d4" },
-  { id: 7, arm: "Arm 4 (Rear-Right)", position: "Top", rotation: "CCW", pixhawkPin: "MAIN 7", escName: "ESC 7 (40A)", color: "#06b6d4" },
-  { id: 8, arm: "Arm 4 (Rear-Right)", position: "Bottom", rotation: "CW", pixhawkPin: "MAIN 8", escName: "ESC 8 (40A)", color: "#f97316" },
-];
 
 export default function DroneBElectronicsWiring({
   theme = "dark",
@@ -52,546 +48,987 @@ export default function DroneBElectronicsWiring({
   const isLight = theme === "light";
   const [filter, setFilter] = useState<WiringFilter>("all");
   const [hoveredNet, setHoveredNet] = useState<string | null>(null);
-  const [selectedMotorId, setSelectedMotorId] = useState<number | null>(null);
+  const [selectedComp, setSelectedComp] = useState<SelectedComponentInfo | null>(null);
+  const [zoomLevel, setZoomLevel] = useState<number>(1.0);
 
-  // Wire highlight logic
-  const isWireVisible = (wireCategory: string, netName: string) => {
-    if (hoveredNet) {
-      return hoveredNet === netName;
-    }
+  // Wire highlight helper
+  const isWireVisible = (type: WiringFilter, netName: string) => {
+    if (hoveredNet) return hoveredNet === netName;
     if (filter === "all") return true;
-    if (filter === "power") return wireCategory === "power";
-    if (filter === "avionics") return wireCategory === "avionics";
-    if (filter === "dshot") return wireCategory === "dshot";
-    if (filter === "motors") return wireCategory === "motors";
-    if (filter === "telemetry") return wireCategory === "telemetry";
-    return true;
+    return filter === type;
   };
 
+  // Motor & ESC Column positions (8 columns evenly spaced across 840px canvas)
+  const motorPositions = [
+    { id: 1, mLabel: "M1", escLabel: "ESC 1", x: 65, fcPin: "MAIN 1", rot: "CW", arm: "Arm 1 Top" },
+    { id: 2, mLabel: "M2", escLabel: "ESC 2", x: 175, fcPin: "MAIN 2", rot: "CCW", arm: "Arm 1 Bottom" },
+    { id: 3, mLabel: "M3", escLabel: "ESC 3", x: 285, fcPin: "MAIN 3", rot: "CCW", arm: "Arm 2 Top" },
+    { id: 4, mLabel: "M4", escLabel: "ESC 4", x: 395, fcPin: "MAIN 4", rot: "CW", arm: "Arm 2 Bottom" },
+    { id: 5, mLabel: "M5", escLabel: "ESC 5", x: 505, fcPin: "MAIN 5", rot: "CW", arm: "Arm 3 Top" },
+    { id: 6, mLabel: "M6", escLabel: "ESC 6", x: 615, fcPin: "MAIN 6", rot: "CCW", arm: "Arm 3 Bottom" },
+    { id: 7, mLabel: "M7", escLabel: "ESC 7", x: 725, fcPin: "MAIN 7", rot: "CCW", arm: "Arm 4 Top" },
+    { id: 8, mLabel: "M8", escLabel: "ESC 8", x: 835, fcPin: "MAIN 8", rot: "CW", arm: "Arm 4 Bottom" },
+  ];
+
   return (
-    <div
-      className={`w-full rounded-2xl border transition-colors overflow-hidden select-none ${
-        isLight ? "bg-white border-slate-200 text-slate-900 shadow-sm" : "bg-[#090c14] border-white/10 text-white shadow-2xl"
-      }`}
-    >
-      {/* ================= 1. HEADER & INTERACTIVE WIRE FILTER ================= */}
-      <div
-        className={`p-4 sm:p-5 border-b flex flex-wrap items-center justify-between gap-4 ${
-          isLight ? "bg-slate-50 border-slate-200" : "bg-[#0c0f1b] border-white/10"
-        }`}
-      >
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <h2 className="text-base sm:text-lg font-extrabold tracking-tight">
-              Drone-B Industrial Octocopter Wiring Architecture
-            </h2>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 font-bold">
-              Pixhawk 6C + 6S PDB-HEX
+    <div className="w-full space-y-4 select-none">
+      {/* ================= 1. REFERENCE HEADER BANNER ================= */}
+      <div className="rounded-2xl border border-white/10 bg-[#06080e]/95 p-4 sm:p-5 shadow-2xl backdrop-blur-xl">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          {/* Left Title with Mechverse Branding */}
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white shadow-lg shadow-orange-500/20 shrink-0 font-black text-sm tracking-tighter">
+              MV
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-orange-400 font-bold">
+                  MECHVERSE WIRING DESIGN
+                </span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              </div>
+              <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                Industrial Octocopter
+              </h1>
+              <p className="text-xs sm:text-sm font-bold text-orange-400">
+                Electrical Wiring Design
+              </p>
+            </div>
+          </div>
+
+          {/* Right Reference Metadata Badges */}
+          <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/10 bg-black/40 text-xs font-mono">
+              <Package size={14} className="text-orange-400" />
+              <div className="leading-tight">
+                <div className="text-[9px] text-neutral-400 uppercase">Payload</div>
+                <div className="text-white font-bold">5 – 10 kg</div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/10 bg-black/40 text-xs font-mono">
+              <Clock size={14} className="text-amber-400" />
+              <div className="leading-tight">
+                <div className="text-[9px] text-neutral-400 uppercase">Flight Time</div>
+                <div className="text-white font-bold">20 – 30 min</div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/10 bg-black/40 text-xs font-mono">
+              <Settings size={14} className="text-sky-400" />
+              <div className="leading-tight">
+                <div className="text-[9px] text-neutral-400 uppercase">Use Case</div>
+                <div className="text-white font-bold">Industrial &bull; Survey &bull; Inspection</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Trace Circuit Filters Bar */}
+        <div className="mt-4 pt-3 border-t border-white/5 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-neutral-400 text-[11px] mr-1 flex items-center gap-1">
+              <Layers size={12} /> Trace Filter:
+            </span>
+            {[
+              { id: "all" as const, label: "All Circuits" },
+              { id: "power" as const, label: "🔴 Power (22.2V 6S)" },
+              { id: "dshot" as const, label: "🔵 ESC Signal (DShot)" },
+              { id: "phases" as const, label: "🟡 Motor Phase (A/B/C)" },
+              { id: "telemetry" as const, label: "🟠 Telemetry / Data" },
+              { id: "aux" as const, label: "⚪ Gimbal / AUX" },
+            ].map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setFilter(f.id)}
+                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition cursor-pointer border ${
+                  filter === f.id
+                    ? "bg-orange-500/20 text-orange-400 border-orange-500/40 shadow-sm"
+                    : "bg-white/5 text-neutral-400 hover:text-white border-transparent"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="text-[11px] text-neutral-400 flex items-center gap-2">
+            <span>Active Circuit:</span>
+            <span className="text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+              {hoveredNet || "Hover any wire or component to trace"}
             </span>
           </div>
-          <p className={`text-xs mt-1 ${isLight ? "text-slate-600" : "text-gray-400"}`}>
-            Select a wiring circuit below to trace exact connections, voltage rails, and coaxial motor channels.
-          </p>
-        </div>
-
-        {/* Trace Circuit Filters */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {[
-            { id: "all" as const, label: "🌐 All Connections", icon: Layers },
-            { id: "power" as const, label: "⚡ 22.2V High-Voltage Bus", icon: Zap },
-            { id: "avionics" as const, label: "🛡️ 5.2V Dual BEC Avionics", icon: Cpu },
-            { id: "dshot" as const, label: "📡 DShot600 Digital Lines", icon: Cable },
-            { id: "motors" as const, label: "🌀 8-Motor Coaxial Drive", icon: RotateCw },
-            { id: "telemetry" as const, label: "🛰️ CAN & Telemetry", icon: Radio },
-          ].map((item) => {
-            const Icon = item.icon;
-            const isActive = filter === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setFilter(item.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer border ${
-                  isActive
-                    ? "bg-indigo-600 border-indigo-500 text-white shadow-md shadow-indigo-600/30 font-bold"
-                    : isLight
-                    ? "bg-white border-slate-300 text-slate-700 hover:bg-slate-100"
-                    : "bg-white/5 border-white/10 text-gray-400 hover:text-white hover:bg-white/10"
-                }`}
-              >
-                <Icon size={12} />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
         </div>
       </div>
 
-      {/* Active Net Inspector Banner */}
-      <div
-        className={`px-4 sm:px-6 py-2 border-b flex items-center justify-between text-xs font-mono ${
-          isLight ? "bg-amber-50/60 border-amber-200 text-amber-900" : "bg-indigo-950/30 border-indigo-500/20 text-indigo-300"
-        }`}
-      >
-        <div className="flex items-center gap-2">
-          <Activity size={13} className="text-amber-500 animate-pulse" />
-          <span className="font-bold">Active Wire Circuit:</span>
-          <span className="font-semibold underline">
-            {hoveredNet || (filter === "all" ? "Showing all complete connections. Hover any component or wire to inspect." : `Filtered: ${filter.toUpperCase()} circuits`)}
-          </span>
-        </div>
-        <span className="text-[11px] opacity-75 hidden sm:inline">
-          High-Current Copper Bus &bull; DShot600 Noise Isolated
-        </span>
-      </div>
-
-      {/* ================= 2. MAIN VISUAL INTERACTIVE WIRING DIAGRAM ================= */}
-      <div className="p-4 sm:p-6 relative overflow-x-auto bg-[#060810]">
-        <div className="min-w-[980px] max-w-5xl mx-auto relative rounded-2xl border border-white/10 bg-[#0a0d17] p-6 shadow-2xl">
-          {/* Engineering Background Grid */}
-          <div
-            className="absolute inset-0 pointer-events-none opacity-20"
-            style={{
-              backgroundImage: `
-                radial-gradient(circle, #38bdf8 1px, transparent 1px),
-                linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)
-              `,
-              backgroundSize: "36px 36px, 18px 18px, 18px 18px",
-            }}
-          />
-
-          {/* SVG WIRING OVERLAY */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none z-10 overflow-visible">
-            <defs>
-              <linearGradient id="powerLineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#ef4444" />
-                <stop offset="100%" stopColor="#f59e0b" />
-              </linearGradient>
-            </defs>
-
-            {/* Wire 1: Battery -> PDB (Heavy 10 AWG 22.2V DC) */}
-            {isWireVisible("power", "Battery 22.2V VBAT (10 AWG)") && (
-              <g>
-                <path
-                  d="M 180 90 L 250 90"
-                  fill="none"
-                  stroke="#ef4444"
-                  strokeWidth="5"
-                  strokeLinecap="round"
-                />
-                <circle cx="215" cy="90" r="4" fill="#fef08a" />
-              </g>
-            )}
-
-            {/* Wire 2: PDB Dual 5.2V BEC -> Pixhawk Power 1 & 2 */}
-            {isWireVisible("avionics", "Dual 5.2V Redundant BEC Rails") && (
-              <g>
-                <path
-                  d="M 330 140 L 330 200 L 400 200"
-                  fill="none"
-                  stroke="#f59e0b"
-                  strokeWidth="3.5"
-                  strokeLinecap="round"
-                />
-                <circle cx="330" cy="170" r="3.5" fill="#f59e0b" />
-              </g>
-            )}
-
-            {/* Wire 3: PDB 22.2V Heavy Rails -> ESCs Central Junction */}
-            {isWireVisible("power", "6S Main Power Bus to 8x ESCs") && (
-              <g>
-                <path
-                  d="M 410 90 L 590 90"
-                  fill="none"
-                  stroke="#ef4444"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                />
-                <circle cx="500" cy="90" r="3.5" fill="#f87171" />
-              </g>
-            )}
-
-            {/* Wire 4: Pixhawk MAIN 1..8 -> ESCs Digital DShot Signals */}
-            {isWireVisible("dshot", "Pixhawk MAIN 1..8 (DShot600 Digital)") && (
-              <g>
-                <path
-                  d="M 580 230 L 630 230 L 630 140 L 670 140"
-                  fill="none"
-                  stroke="#06b6d4"
-                  strokeWidth="3"
-                  strokeDasharray="4 3"
-                  strokeLinecap="round"
-                />
-                <circle cx="630" cy="185" r="3.5" fill="#06b6d4" />
-              </g>
-            )}
-
-            {/* Wire 5: Pixhawk CAN 1 -> Holybro RTK GPS */}
-            {isWireVisible("telemetry", "CAN 1 Differential Bus (5V RTK GPS)") && (
-              <g>
-                <path
-                  d="M 400 240 L 330 240 L 330 310 L 250 310"
-                  fill="none"
-                  stroke="#10b981"
-                  strokeWidth="2.5"
-                  strokeDasharray="3 2"
-                  strokeLinecap="round"
-                />
-              </g>
-            )}
-
-            {/* Wire 6: Pixhawk TELEM 1 -> HereLink Air Unit */}
-            {isWireVisible("telemetry", "TELEM 1 High-Speed UART Video/RC") && (
-              <g>
-                <path
-                  d="M 400 270 L 310 270 L 310 390 L 250 390"
-                  fill="none"
-                  stroke="#8b5cf6"
-                  strokeWidth="2.5"
-                  strokeDasharray="3 2"
-                  strokeLinecap="round"
-                />
-              </g>
-            )}
-
-            {/* Wire 7: 8x ESCs -> 8x Coaxial Motors (3-Phase AC) */}
-            {isWireVisible("motors", "3-Phase AC (U, V, W) to Coaxial Outrunners") && (
-              <g>
-                <path
-                  d="M 780 140 L 830 140"
-                  fill="none"
-                  stroke="#f97316"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                />
-              </g>
-            )}
-          </svg>
-
-          {/* ================= 3-COLUMN SCHEMATIC BLOCKS ================= */}
-          <div className="grid grid-cols-12 gap-6 relative z-20">
-            {/* COLUMN 1: POWER SOURCE & SENSORS (cols 1..4) */}
-            <div className="col-span-12 md:col-span-4 space-y-4">
-              {/* BLOCK A: 6S LiPo Battery */}
-              <div
-                onMouseEnter={() => setHoveredNet("Battery 22.2V VBAT (10 AWG)")}
-                onMouseLeave={() => setHoveredNet(null)}
-                className={`p-4 rounded-xl border transition-all cursor-pointer ${
-                  hoveredNet === "Battery 22.2V VBAT (10 AWG)" || filter === "power"
-                    ? "bg-red-500/15 border-red-500 shadow-lg shadow-red-500/20 scale-[1.02]"
-                    : "bg-[#101422] border-red-500/30 hover:border-red-500/60"
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-2 text-red-400 font-bold text-xs uppercase tracking-wider">
-                    <Zap size={14} />
-                    <span>6S LiPo Battery Pack</span>
-                  </div>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-red-500/20 text-red-300 font-bold border border-red-500/30">
-                    22.2V 16,000mAh
-                  </span>
-                </div>
-                <div className="text-[11px] text-gray-300 space-y-1 font-mono">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Connector:</span>
-                    <span className="text-amber-300 font-bold">XT90-S Anti-Spark</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Wiring:</span>
-                    <span className="text-white">10 AWG Pure Silicone Lead</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Max Discharge:</span>
-                    <span className="text-emerald-400">160A Continuous</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* BLOCK B: Matek PDB-HEX (Power Distribution Board) */}
-              <div
-                onMouseEnter={() => setHoveredNet("6S Main Power Bus to 8x ESCs")}
-                onMouseLeave={() => setHoveredNet(null)}
-                className={`p-4 rounded-xl border transition-all cursor-pointer ${
-                  hoveredNet === "6S Main Power Bus to 8x ESCs" || filter === "power"
-                    ? "bg-amber-500/15 border-amber-500 shadow-lg shadow-amber-500/20 scale-[1.02]"
-                    : "bg-[#101422] border-amber-500/30 hover:border-amber-500/60"
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider">
-                    <Zap size={14} />
-                    <span>Matek PDB-HEX Power Bus</span>
-                  </div>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">
-                    140A Continuous
-                  </span>
-                </div>
-                <div className="text-[11px] text-gray-300 space-y-1 font-mono">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Input:</span>
-                    <span className="text-red-400">22.2V DC (6S)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Dual Regulators:</span>
-                    <span className="text-amber-300">Dual 5.2V @ 3A BEC</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Outputs:</span>
-                    <span className="text-white">8x ESC Heavy Solder Pads</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* BLOCK C: Holybro H-RTK F9P GNSS & Compass */}
-              <div
-                onMouseEnter={() => setHoveredNet("CAN 1 Differential Bus (5V RTK GPS)")}
-                onMouseLeave={() => setHoveredNet(null)}
-                className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
-                  hoveredNet === "CAN 1 Differential Bus (5V RTK GPS)" || filter === "telemetry"
-                    ? "bg-emerald-500/15 border-emerald-500 shadow-lg shadow-emerald-500/20"
-                    : "bg-[#101422] border-emerald-500/20 hover:border-emerald-500/50"
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-emerald-400 font-bold text-xs flex items-center gap-1.5">
-                    <Compass size={13} />
-                    <span>H-RTK F9P Navigation</span>
-                  </span>
-                  <span className="text-[9px] font-mono text-emerald-300 bg-emerald-500/10 px-1.5 py-0.5 rounded">
-                    CAN 1 Port
-                  </span>
-                </div>
-                <p className="text-[10px] text-gray-400">
-                  Dual-frequency L1/L2 RTK GNSS receiver providing 1.5cm positioning accuracy via differential CAN bus.
-                </p>
-              </div>
-
-              {/* BLOCK D: HereLink HD Telemetry */}
-              <div
-                onMouseEnter={() => setHoveredNet("TELEM 1 High-Speed UART Video/RC")}
-                onMouseLeave={() => setHoveredNet(null)}
-                className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
-                  hoveredNet === "TELEM 1 High-Speed UART Video/RC" || filter === "telemetry"
-                    ? "bg-purple-500/15 border-purple-500 shadow-lg shadow-purple-500/20"
-                    : "bg-[#101422] border-purple-500/20 hover:border-purple-500/50"
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-purple-400 font-bold text-xs flex items-center gap-1.5">
-                    <Radio size={13} />
-                    <span>HereLink HD Air Unit</span>
-                  </span>
-                  <span className="text-[9px] font-mono text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded">
-                    TELEM 1
-                  </span>
-                </div>
-                <p className="text-[10px] text-gray-400">
-                  1080p 60fps low-latency video transmission and 16-channel MAVLink control over a 20km digital link.
-                </p>
+      {/* ================= 2. THREE-COLUMN ARCHITECTURE GRID ================= */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
+        {/* ================= LEFT COLUMN: MAIN COMPONENTS ================= */}
+        <div className="xl:col-span-3 space-y-4">
+          {/* Drone 3D Photo Render Card */}
+          <div className="rounded-2xl border border-white/10 bg-[#090b12] p-3 shadow-xl overflow-hidden group">
+            <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-gradient-to-b from-[#121624] to-[#080a10] border border-white/5 flex items-center justify-center">
+              <img
+                src="/images/models/drone-b.jpg"
+                alt="Drone B Industrial Octocopter"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+              <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-xs font-mono">
+                <span className="text-white font-bold text-[11px] drop-shadow">Drone-B Hex/Octo</span>
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-orange-500/80 text-white font-bold drop-shadow">
+                  Coaxial 8-Rotor
+                </span>
               </div>
             </div>
+          </div>
 
-            {/* COLUMN 2: AUTOPILOT BRAIN (cols 5..7) */}
-            <div className="col-span-12 md:col-span-4 space-y-4">
+          {/* Main Components Spec Card */}
+          <div className="rounded-2xl border border-white/10 bg-[#070910] p-4 shadow-xl space-y-3">
+            <div className="text-xs font-mono uppercase tracking-wider font-bold text-orange-400 border-b border-white/5 pb-2">
+              Main Components
+            </div>
+
+            <div className="space-y-2.5 text-xs font-mono">
+              {[
+                {
+                  icon: Cpu,
+                  title: "Flight Controller",
+                  spec: "Pixhawk 6C (or Cube)",
+                  desc: "Dual-core STM32H753 480MHz with triple-redundant isolated IMUs.",
+                  voltage: "5.0V Dual BEC",
+                  pins: ["MAIN 1..8", "CAN 1", "TELEM 1", "GPS 1", "POWER 1/2"],
+                  color: "#06b6d4",
+                },
+                {
+                  icon: Zap,
+                  title: "ESC (8 x)",
+                  spec: "40A – 60A, 4–6S",
+                  desc: "Ultra-low-resistance MOSFET speed controllers running digital DShot600.",
+                  voltage: "22.2V Direct 6S",
+                  pins: ["VCC (+)", "GND (-)", "PWM/DShot In", "Phase U, V, W"],
+                  color: "#ef4444",
+                },
+                {
+                  icon: Settings,
+                  title: "Brushless Motor (8 x)",
+                  spec: "KV 380 – 520 (Industrial)",
+                  desc: "Heavy-lift high-torque brushless outrunners generating up to 4.2kg static thrust.",
+                  voltage: "3-Phase AC (22.2V)",
+                  pins: ["Phase A", "Phase B", "Phase C"],
+                  color: "#f59e0b",
+                },
+                {
+                  icon: Package,
+                  title: "LiPo Battery",
+                  spec: "6S (22.2 V) 10000 – 22000 mAh",
+                  desc: "High-discharge 35C solid-state lithium polymer pack with XT90-S anti-spark.",
+                  voltage: "22.2V (25.2V Peak)",
+                  pins: ["XT90 Red (+)", "XT90 Black (-)"],
+                  color: "#ef4444",
+                },
+                {
+                  icon: Radio,
+                  title: "RC Receiver",
+                  spec: "ELRS / Crossfire",
+                  desc: "Long-range 2.4GHz / 915MHz ExpressLRS dual-diversity receiver with telemetry.",
+                  voltage: "5.0V Logic",
+                  pins: ["CRSF TX", "CRSF RX", "5V", "GND"],
+                  color: "#f97316",
+                },
+                {
+                  icon: Compass,
+                  title: "GNSS + Compass",
+                  spec: "u-blox M9N",
+                  desc: "Multi-constellation GPS/Galileo/BeiDou module with integrated IST8310 magnetometer.",
+                  voltage: "5.0V Regulated",
+                  pins: ["UART TX/RX", "I2C SDA/SCL", "5V", "GND"],
+                  color: "#10b981",
+                },
+                {
+                  icon: Radio,
+                  title: "Telemetry (Optional)",
+                  spec: "915 MHz / 2.4 GHz",
+                  desc: "500mW bidirectional ground station datalink transmitting live MAVLink telemetry.",
+                  voltage: "5.0V Logic",
+                  pins: ["TELEM TX/RX", "CTS/RTS", "5V", "GND"],
+                  color: "#a855f7",
+                },
+                {
+                  icon: Camera,
+                  title: "Payload",
+                  spec: "Gimbal / Industrial Camera",
+                  desc: "3-axis stabilized brushless gimbal with Sony 4K sensor and thermal inspection feed.",
+                  voltage: "12V BEC / 6S Direct",
+                  pins: ["Pitch PWM", "Yaw PWM", "Video Out", "GND"],
+                  color: "#cbd5e1",
+                },
+              ].map((item, idx) => {
+                const Icon = item.icon;
+                return (
+                  <div
+                    key={idx}
+                    onClick={() =>
+                      setSelectedComp({
+                        title: item.title,
+                        category: item.spec,
+                        spec: item.spec,
+                        description: item.desc,
+                        pins: item.pins,
+                        voltage: item.voltage,
+                      })
+                    }
+                    className="p-2.5 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.06] hover:border-orange-500/40 transition cursor-pointer flex items-start gap-2.5 group"
+                  >
+                    <div className="w-7 h-7 rounded-lg bg-black/60 border border-white/10 flex items-center justify-center shrink-0 text-neutral-400 group-hover:text-orange-400 group-hover:border-orange-500/30 transition">
+                      <Icon size={14} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-white font-bold text-[11px] truncate group-hover:text-orange-300 transition">
+                        {item.title}
+                      </div>
+                      <div className="text-[10px] text-neutral-400 truncate">{item.spec}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* ================= CENTER COLUMN: 2D SCHEMATIC CANVAS ================= */}
+        <div className="xl:col-span-6 space-y-3">
+          <div className="relative rounded-2xl border border-white/10 bg-[#05070d] p-3 sm:p-4 shadow-2xl overflow-x-auto custom-scrollbar">
+            {/* Technical Background Grid */}
+            <div
+              className="absolute inset-0 pointer-events-none opacity-20"
+              style={{
+                backgroundImage: `
+                  radial-gradient(circle, #f97316 0.8px, transparent 0.8px),
+                  linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                  linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)
+                `,
+                backgroundSize: "36px 36px, 18px 18px, 18px 18px",
+              }}
+            />
+
+            {/* Inner Scalable Canvas Container (920px x 680px) */}
+            <div
+              style={{ transform: `scale(${zoomLevel})`, transformOrigin: "top center" }}
+              className="relative w-[920px] h-[680px] shrink-0 mx-auto select-none transition-transform duration-200"
+            >
+              {/* ================= SVG SIGNAL & POWER TRACES ================= */}
+              <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible z-10">
+                <defs>
+                  <filter id="wireGlow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+
+                {/* --- 1. MOTOR 3-PHASE WIRES (Yellow/Red/Black) from M1..M8 down to ESCs --- */}
+                {motorPositions.map((pos) => {
+                  const isVisible = isWireVisible("phases", `Motor Phase ${pos.mLabel} (A/B/C)`);
+                  if (!isVisible) return null;
+                  return (
+                    <g key={`phase-${pos.id}`}>
+                      {/* Phase A (Yellow) */}
+                      <line x1={pos.x + 10} y1={88} x2={pos.x + 10} y2={125} stroke="#eab308" strokeWidth="2.5" />
+                      {/* Phase B (Red) */}
+                      <line x1={pos.x + 20} y1={88} x2={pos.x + 20} y2={125} stroke="#ef4444" strokeWidth="2.5" />
+                      {/* Phase C (Black) */}
+                      <line x1={pos.x + 30} y1={88} x2={pos.x + 30} y2={125} stroke="#475569" strokeWidth="2.5" />
+                    </g>
+                  );
+                })}
+
+                {/* --- 2. RED POWER BUS (22.2V 6S) CONNECTING ALL 8 ESCS TO PDB --- */}
+                {isWireVisible("power", "Power (V+) - 22.2 V (6S)") && (
+                  <g filter="url(#wireGlow)">
+                    {/* Horizontal Main Red Power Rail above Pixhawk (y = 230) */}
+                    <line x1={85} y1={230} x2={855} y2={230} stroke="#ef4444" strokeWidth="4" strokeLinecap="round" />
+
+                    {/* Drops from each ESC (y = 192 to y = 230) */}
+                    {motorPositions.map((pos) => (
+                      <line
+                        key={`pwr-drop-${pos.id}`}
+                        x1={pos.x + 12}
+                        y1={192}
+                        x2={pos.x + 12}
+                        y2={230}
+                        stroke="#ef4444"
+                        strokeWidth="3.5"
+                      />
+                    ))}
+
+                    {/* Central Red Feed from PDB (y = 525) up to horizontal power rail (y = 230) */}
+                    <path
+                      d="M 505 525 L 505 250 L 470 230"
+                      fill="none"
+                      stroke="#ef4444"
+                      strokeWidth="5"
+                      strokeLinecap="round"
+                    />
+                  </g>
+                )}
+
+                {/* --- 3. BLUE ESC SIGNAL WIRES (DShot / PWM) from ESC 1..8 into PIXHAWK TOP --- */}
+                {motorPositions.map((pos, idx) => {
+                  const isVisible = isWireVisible("dshot", `ESC Signal ${pos.escLabel} -> ${pos.fcPin}`);
+                  if (!isVisible) return null;
+
+                  // Target pin on Pixhawk top header (x spans from 400 to 520, y = 338)
+                  const targetX = 405 + idx * 17;
+                  const startX = pos.x + 28;
+                  const startY = 192;
+
+                  // Smooth bezier curve down into Pixhawk
+                  return (
+                    <g key={`dshot-${pos.id}`}>
+                      <path
+                        d={`M ${startX} ${startY} C ${startX} ${startY + 60}, ${targetX} ${300}, ${targetX} 338`}
+                        fill="none"
+                        stroke="#0084ff"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        className="transition-all duration-200"
+                      />
+                      <circle cx={targetX} cy={338} r="2.5" fill="#60a5fa" />
+                    </g>
+                  );
+                })}
+
+                {/* --- 4. RC RECEIVER (ELRS) TO PIXHAWK RC IN --- */}
+                {isWireVisible("telemetry", "RC Receiver (ELRS) -> RC IN") && (
+                  <g>
+                    {/* Orange CRSF signal */}
+                    <path
+                      d="M 285 365 L 375 365"
+                      fill="none"
+                      stroke="#f97316"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                    />
+                    {/* Red 5V power */}
+                    <path
+                      d="M 285 372 L 375 372"
+                      fill="none"
+                      stroke="#ef4444"
+                      strokeWidth="2"
+                    />
+                  </g>
+                )}
+
+                {/* --- 5. GNSS + COMPASS (M9N) TO PIXHAWK GPS1 & I2C --- */}
+                {isWireVisible("telemetry", "GNSS + Compass (M9N) -> GPS & I2C") && (
+                  <g>
+                    <path
+                      d="M 285 450 L 375 450"
+                      fill="none"
+                      stroke="#f97316"
+                      strokeWidth="2.5"
+                    />
+                    <path
+                      d="M 285 456 L 375 456"
+                      fill="none"
+                      stroke="#06b6d4"
+                      strokeWidth="2"
+                    />
+                  </g>
+                )}
+
+                {/* --- 6. TELEMETRY (915 MHz) TO PIXHAWK TELEM1 --- */}
+                {isWireVisible("telemetry", "Telemetry (915 MHz) -> TELEM 1") && (
+                  <g>
+                    <path
+                      d="M 610 365 L 545 365"
+                      fill="none"
+                      stroke="#f97316"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M 610 372 L 545 372"
+                      fill="none"
+                      stroke="#0084ff"
+                      strokeWidth="2"
+                    />
+                  </g>
+                )}
+
+                {/* --- 7. PAYLOAD / GIMBAL TO PIXHAWK AUX --- */}
+                {isWireVisible("aux", "Payload / Gimbal -> AUX Control") && (
+                  <g>
+                    <path
+                      d="M 620 450 L 545 450"
+                      fill="none"
+                      stroke="#f97316"
+                      strokeWidth="2.5"
+                    />
+                    <path
+                      d="M 620 456 L 545 456"
+                      fill="none"
+                      stroke="#0084ff"
+                      strokeWidth="2"
+                    />
+                  </g>
+                )}
+
+                {/* --- 8. POWER MODULE (PM) SENSE TO PIXHAWK BOTTOM --- */}
+                {isWireVisible("power", "5V Regulated Power & Current Sense") && (
+                  <g>
+                    <path
+                      d="M 330 525 L 330 480 L 460 480 L 460 452"
+                      fill="none"
+                      stroke="#eab308"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+                  </g>
+                )}
+
+                {/* --- 9. LIPO BATTERY -> XT90 -> POWER MODULE -> PDB --- */}
+                {isWireVisible("power", "Battery 6S VBAT Heavy Bus") && (
+                  <g>
+                    {/* Battery to XT90 */}
+                    <line x1={220} y1={555} x2={240} y2={555} stroke="#ef4444" strokeWidth="5" />
+                    <line x1={220} y1={565} x2={240} y2={565} stroke="#475569" strokeWidth="5" />
+
+                    {/* XT90 to Power Module */}
+                    <line x1={265} y1={555} x2={285} y2={555} stroke="#ef4444" strokeWidth="5" />
+                    <line x1={265} y1={565} x2={285} y2={565} stroke="#475569" strokeWidth="5" />
+
+                    {/* Power Module to PDB */}
+                    <line x1={360} y1={555} x2={430} y2={555} stroke="#ef4444" strokeWidth="5" />
+                    <line x1={360} y1={565} x2={430} y2={565} stroke="#475569" strokeWidth="5" />
+                  </g>
+                )}
+              </svg>
+
+              {/* ================= 8 MOTOR & ESC COLUMNS (TOP ROW) ================= */}
+              {motorPositions.map((pos) => (
+                <div
+                  key={`col-${pos.id}`}
+                  style={{ left: `${pos.x}px`, position: "absolute", top: "15px", width: "50px" }}
+                  className="flex flex-col items-center z-20 cursor-pointer"
+                  onClick={() =>
+                    setSelectedComp({
+                      title: `Motor ${pos.mLabel} + ${pos.escLabel}`,
+                      category: pos.arm,
+                      spec: `${pos.rot} Rotation &bull; ${pos.fcPin}`,
+                      description: `High-efficiency brushless outrunner mounted in ${pos.rot} configuration, commanded via ${pos.fcPin} digital DShot600 protocol.`,
+                      pins: ["Phase U", "Phase V", "Phase W", pos.fcPin, "6S 22.2V Bus"],
+                      voltage: "22.2V 6S",
+                    })
+                  }
+                  onMouseEnter={() =>
+                    setHoveredNet(`ESC Signal ${pos.escLabel} -> ${pos.fcPin}`)
+                  }
+                  onMouseLeave={() => setHoveredNet(null)}
+                >
+                  {/* Orange Pill Badge (M1..M8) */}
+                  <div className="px-2 py-0.5 rounded bg-[#ff6a00] text-black font-extrabold text-[11px] shadow-md shadow-orange-500/30 tracking-wider">
+                    {pos.mLabel}
+                  </div>
+
+                  {/* Brushless Motor Graphic (Red Bell, Copper Coils, Steel Shaft) */}
+                  <div className="mt-2 w-11 h-11 relative flex items-center justify-center">
+                    <svg viewBox="0 0 44 44" className="w-full h-full drop-shadow-md">
+                      {/* Top Shaft */}
+                      <rect x="20" y="2" width="4" height="6" fill="#cbd5e1" rx="1" />
+                      {/* Red Anodized Bell */}
+                      <rect x="6" y="8" width="32" height="18" fill="#d92626" rx="4" />
+                      <line x1="8" y1="14" x2="36" y2="14" stroke="#ff7878" strokeWidth="1" />
+                      {/* Cooling slots */}
+                      <rect x="10" y="10" width="3" height="14" fill="#18181b" rx="1" />
+                      <rect x="16" y="10" width="3" height="14" fill="#18181b" rx="1" />
+                      <rect x="25" y="10" width="3" height="14" fill="#18181b" rx="1" />
+                      <rect x="31" y="10" width="3" height="14" fill="#18181b" rx="1" />
+                      {/* Copper stator windings visible inside */}
+                      <rect x="8" y="26" width="28" height="6" fill="#b45309" rx="1" />
+                      {/* Black Stator Base */}
+                      <rect x="6" y="32" width="32" height="6" fill="#18181b" rx="2" />
+                    </svg>
+                  </div>
+
+                  {/* 3-Phase Wire Gap */}
+                  <div className="h-9 w-full flex items-center justify-center text-[8px] font-mono text-neutral-500">
+                    <span className="opacity-0">3P</span>
+                  </div>
+
+                  {/* ESC 1..8 Module Package */}
+                  <div className="w-12 h-16 rounded-lg bg-[#0e121a] border border-white/20 p-1 flex flex-col items-center justify-between shadow-lg relative group-hover:border-orange-500/60 transition">
+                    {/* 4 Gold corner pads */}
+                    <div className="w-1.5 h-1.5 rounded-full bg-amber-400 absolute top-1 left-1" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-amber-400 absolute top-1 right-1" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-amber-400 absolute bottom-1 left-1" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-amber-400 absolute bottom-1 right-1" />
+
+                    <div className="text-[9px] font-mono font-black text-white text-center mt-2.5">
+                      {pos.escLabel}
+                    </div>
+                    <div className="text-[8px] font-mono font-bold text-amber-400 pb-1">
+                      40A
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* ================= CENTRAL FLIGHT CONTROLLER: PIXHAWK 6C ================= */}
               <div
-                onMouseEnter={() => setHoveredNet("Dual 5.2V Redundant BEC Rails")}
+                style={{ left: "375px", top: "338px", width: "170px", height: "115px" }}
+                className="absolute z-20 rounded-2xl border-2 border-amber-400/80 bg-[#0a0d14] p-3 shadow-[0_0_35px_rgba(245,158,11,0.25)] flex flex-col justify-between cursor-pointer hover:border-amber-400 transition"
+                onClick={() =>
+                  setSelectedComp({
+                    title: "Pixhawk 6C Autopilot",
+                    category: "Central Avionics Flight Controller",
+                    spec: "STM32H753 480MHz &bull; Triple IMU Redundancy",
+                    description: "High-reliability industrial autopilot managing autonomous navigation, real-time stabilization, 8x motor mixer, and telemetry datalinks.",
+                    pins: [
+                      "MAIN 1–8 (PWM/DShot)",
+                      "GPS 1 / I2C",
+                      "TELEM 1 / 2",
+                      "RC IN (ELRS)",
+                      "POWER 1 / 2 (Dual BEC)",
+                    ],
+                    voltage: "5.0V Regulated",
+                  })
+                }
+                onMouseEnter={() => setHoveredNet("Pixhawk 6C Central Flight Processor")}
                 onMouseLeave={() => setHoveredNet(null)}
-                className="p-5 rounded-2xl border border-sky-500/40 bg-gradient-to-b from-[#11192e] to-[#0a101f] shadow-2xl relative space-y-3"
+              >
+                {/* Gold Top Pin Headers (MAIN 1..8) */}
+                <div className="flex items-center justify-between px-1">
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((p) => (
+                    <div
+                      key={p}
+                      className="w-2.5 h-2.5 rounded-sm bg-amber-400/90 border border-white/20 text-[7px] font-mono text-black font-black flex items-center justify-center shadow-xs"
+                    >
+                      {p}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Center Pixhawk Silkscreen & Arrow Logo */}
+                <div className="flex flex-col items-center justify-center text-center my-auto">
+                  <div className="w-5 h-5 text-neutral-200">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2L2 19h7v3h6v-3h7L12 2z" />
+                    </svg>
+                  </div>
+                  <div className="text-xs font-black tracking-wider text-white mt-0.5">
+                    Pixhawk 6C
+                  </div>
+                  <div className="text-[8px] font-mono text-neutral-400">
+                    Industrial Autopilot
+                  </div>
+                </div>
+
+                {/* Gold Bottom Connector Pins */}
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-6 h-1.5 rounded-xs bg-amber-400/80" />
+                  <div className="w-6 h-1.5 rounded-xs bg-amber-400/80" />
+                  <div className="w-6 h-1.5 rounded-xs bg-amber-400/80" />
+                </div>
+              </div>
+
+              {/* ================= LEFT SENSORS & RECEIVER ================= */}
+              {/* RC Receiver (ELRS) */}
+              <div
+                style={{ left: "195px", top: "348px", width: "90px" }}
+                className="absolute z-20 rounded-xl border border-white/20 bg-[#0e121a] p-2 shadow-lg cursor-pointer hover:border-orange-400 transition"
+                onClick={() =>
+                  setSelectedComp({
+                    title: "RC Receiver (ELRS)",
+                    category: "Radio Control Uplink",
+                    spec: "2.4GHz ExpressLRS &bull; True Diversity",
+                    description: "Ultra-low-latency 500Hz control link with telemetry return and failsafe motor cut.",
+                    pins: ["CRSF TX", "CRSF RX", "5V IN", "GND"],
+                    voltage: "5.0V Logic",
+                  })
+                }
+                onMouseEnter={() => setHoveredNet("RC Receiver (ELRS) -> RC IN")}
+                onMouseLeave={() => setHoveredNet(null)}
+              >
+                {/* Twin Antenna Whips */}
+                <div className="absolute -left-4 top-2 bottom-2 flex flex-col justify-between">
+                  <div className="w-4 h-0.5 bg-neutral-400" />
+                  <div className="w-4 h-0.5 bg-neutral-400" />
+                </div>
+                <div className="text-[10px] font-bold text-white text-center leading-tight">
+                  RC Receiver
+                </div>
+                <div className="text-[8px] font-mono text-neutral-400 text-center mt-0.5">
+                  (ELRS)
+                </div>
+              </div>
+
+              {/* GNSS + Compass (M9N) */}
+              <div
+                style={{ left: "215px", top: "428px", width: "70px", height: "70px" }}
+                className="absolute z-20 rounded-2xl border-2 border-white/20 bg-gradient-to-b from-[#e2e8f0] to-[#cbd5e1] p-2 shadow-xl flex flex-col items-center justify-center text-center cursor-pointer hover:border-emerald-400 transition"
+                onClick={() =>
+                  setSelectedComp({
+                    title: "GNSS + Compass (u-blox M9N)",
+                    category: "Satellite Navigation Puck",
+                    spec: "72-Channel Concurrent GNSS &bull; 1.5m CEP",
+                    description: "Ceramic patch antenna receiving GPS, GLONASS, Galileo, and BeiDou signals, with internal compass.",
+                    pins: ["UART TX", "UART RX", "I2C SDA", "I2C SCL", "5V", "GND"],
+                    voltage: "5.0V Regulated",
+                  })
+                }
+                onMouseEnter={() => setHoveredNet("GNSS + Compass (M9N) -> GPS & I2C")}
+                onMouseLeave={() => setHoveredNet(null)}
+              >
+                <div className="w-3.5 h-3.5 text-neutral-800">
+                  <Compass size={14} />
+                </div>
+                <div className="text-[9px] font-extrabold text-neutral-900 mt-1 leading-tight">
+                  GNSS +
+                </div>
+                <div className="text-[8px] font-bold text-neutral-700 leading-tight">
+                  Compass
+                </div>
+                <div className="text-[7px] font-mono text-neutral-600 mt-0.5 font-bold">
+                  (M9N)
+                </div>
+              </div>
+
+              {/* ================= RIGHT TELEMETRY & GIMBAL ================= */}
+              {/* Telemetry Modem (915 MHz) */}
+              <div
+                style={{ left: "610px", top: "348px", width: "95px" }}
+                className="absolute z-20 rounded-xl border border-white/20 bg-[#0e121a] p-2 shadow-lg cursor-pointer hover:border-purple-400 transition"
+                onClick={() =>
+                  setSelectedComp({
+                    title: "Telemetry Transceiver (915 MHz)",
+                    category: "Ground Control Datalink",
+                    spec: "500mW RF Power &bull; Up to 15km Range",
+                    description: "Bi-directional MAVLink telemetry modem connecting drone flight status to QGroundControl / Mission Planner.",
+                    pins: ["UART TX", "UART RX", "CTS", "RTS", "5V", "GND"],
+                    voltage: "5.0V Logic",
+                  })
+                }
+                onMouseEnter={() => setHoveredNet("Telemetry (915 MHz) -> TELEM 1")}
+                onMouseLeave={() => setHoveredNet(null)}
+              >
+                {/* Rubber Duck Antenna */}
+                <div className="absolute -right-4 top-1/2 -translate-y-1/2 w-4 h-1.5 bg-neutral-300 rounded-r-sm" />
+                <div className="text-[10px] font-bold text-white text-center leading-tight">
+                  Telemetry
+                </div>
+                <div className="text-[8px] font-mono text-neutral-400 text-center mt-0.5">
+                  (915 MHz)
+                </div>
+              </div>
+
+              {/* Payload / Gimbal Camera Unit */}
+              <div
+                style={{ left: "620px", top: "428px", width: "85px", height: "70px" }}
+                className="absolute z-20 rounded-xl border border-white/20 bg-[#0e121a] p-2 shadow-lg flex flex-col items-center justify-center text-center cursor-pointer hover:border-sky-400 transition"
+                onClick={() =>
+                  setSelectedComp({
+                    title: "Payload / Gimbal Camera Unit",
+                    category: "Optical & Thermal Inspection Sensor",
+                    spec: "3-Axis Brushless Gimbal &bull; 4K 60FPS",
+                    description: "Stabilized payload unit controlled by Pixhawk AUX channels for pitch tilt and camera trigger.",
+                    pins: ["Pitch PWM", "Yaw PWM", "Video Stream", "12V BEC", "GND"],
+                    voltage: "12V Regulated",
+                  })
+                }
+                onMouseEnter={() => setHoveredNet("Payload / Gimbal -> AUX Control")}
+                onMouseLeave={() => setHoveredNet(null)}
+              >
+                <div className="w-5 h-5 rounded-full bg-neutral-800 border border-neutral-600 flex items-center justify-center text-sky-400">
+                  <Camera size={11} />
+                </div>
+                <div className="text-[9px] font-bold text-white mt-1 leading-tight">
+                  Payload /
+                </div>
+                <div className="text-[8px] font-mono text-neutral-400 leading-tight">
+                  Gimbal
+                </div>
+              </div>
+
+              {/* ================= BOTTOM ROW: BATTERY, POWER MODULE, PDB ================= */}
+              {/* LiPo Battery (6S 22.2V) */}
+              <div
+                style={{ left: "65px", top: "525px", width: "155px", height: "70px" }}
+                className="absolute z-20 rounded-xl border-2 border-red-500/60 bg-gradient-to-r from-[#181a24] to-[#0e1017] p-2.5 shadow-xl flex flex-col justify-between cursor-pointer hover:border-red-400 transition"
+                onClick={() =>
+                  setSelectedComp({
+                    title: "6S High-Discharge LiPo Battery",
+                    category: "Primary Power Source",
+                    spec: "22.2V Nominal (25.2V Peak) &bull; 10000 – 22000 mAh",
+                    description: "Heavy-duty 6S LiPo power reservoir capable of delivering up to 160A continuous current to the octocopter propulsion bus.",
+                    pins: ["XT90-S Anti-Spark (+)", "XT90-S Negative (-)"],
+                    voltage: "22.2V DC",
+                  })
+                }
+                onMouseEnter={() => setHoveredNet("Battery 6S VBAT Heavy Bus")}
+                onMouseLeave={() => setHoveredNet(null)}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sky-400 font-black text-sm uppercase tracking-wider">
-                    <Cpu size={16} />
-                    <span>Pixhawk 6C Flight Brain</span>
-                  </div>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 font-bold border border-sky-500/30">
-                    STM32H753 480MHz
+                  <span className="text-[11px] font-black text-white">LiPo Battery</span>
+                  <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-red-500/20 text-red-400 border border-red-500/30 font-bold">
+                    6S
                   </span>
                 </div>
+                <div className="text-[9px] font-mono text-neutral-300">
+                  6S (22.2 V)
+                </div>
+                <div className="text-[8px] font-mono text-neutral-400">
+                  10000 – 22000 mAh
+                </div>
+              </div>
 
-                <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-2 text-[11px] font-mono">
-                  <div className="flex items-center justify-between pb-1.5 border-b border-white/10">
-                    <span className="text-amber-400 font-bold">POWER 1 & 2:</span>
-                    <span className="text-gray-300">Dual 5.2V Isolated Regulators</span>
-                  </div>
-                  <div className="flex items-center justify-between pb-1.5 border-b border-white/10">
-                    <span className="text-cyan-400 font-bold">MAIN 1..8:</span>
-                    <span className="text-gray-300">DShot600 Digital (M1 to M8)</span>
-                  </div>
-                  <div className="flex items-center justify-between pb-1.5 border-b border-white/10">
-                    <span className="text-emerald-400 font-bold">CAN 1:</span>
-                    <span className="text-gray-300">Here3+ / H-RTK Compass</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-purple-400 font-bold">TELEM 1:</span>
-                    <span className="text-gray-300">MAVLink Telemetry Stream</span>
+              {/* XT90 Yellow Connector Indicator */}
+              <div
+                style={{ left: "235px", top: "545px", width: "30px", height: "30px" }}
+                className="absolute z-20 rounded-md bg-[#eab308] border border-amber-300 flex items-center justify-center text-[8px] font-black font-mono text-black shadow-md"
+                title="XT90 Anti-Spark Connector"
+              >
+                XT90
+              </div>
+
+              {/* Power Module (PM) */}
+              <div
+                style={{ left: "285px", top: "530px", width: "75px", height: "60px" }}
+                className="absolute z-20 rounded-xl border border-white/20 bg-[#0e121a] p-1.5 shadow-lg flex flex-col items-center justify-center text-center cursor-pointer hover:border-amber-400 transition"
+                onClick={() =>
+                  setSelectedComp({
+                    title: "Power Module (PM02 / PM06)",
+                    category: "High-Current Shunt & Voltage Regulator",
+                    spec: "Hall-Effect Current Sensor &bull; Dual 5.3V 3A BEC",
+                    description: "Senses total battery voltage and current consumption while supplying clean 5.3V power to the flight controller.",
+                    pins: ["6S IN", "6S OUT", "5.3V BEC", "Voltage Sense", "Current Sense", "GND"],
+                    voltage: "6S -> 5.3V BEC",
+                  })
+                }
+                onMouseEnter={() => setHoveredNet("5V Regulated Power & Current Sense")}
+                onMouseLeave={() => setHoveredNet(null)}
+              >
+                <div className="text-[9px] font-bold text-white leading-tight">
+                  Power Module
+                </div>
+                <div className="text-[8px] font-mono text-amber-400 font-bold mt-0.5">
+                  (PM)
+                </div>
+              </div>
+
+              {/* PDB (8 Outputs) */}
+              <div
+                style={{ left: "430px", top: "525px", width: "105px", height: "70px" }}
+                className="absolute z-20 rounded-2xl border-2 border-amber-500/80 bg-[#090c14] p-2 shadow-2xl flex flex-col items-center justify-between text-center cursor-pointer hover:border-amber-400 transition"
+                onClick={() =>
+                  setSelectedComp({
+                    title: "PDB (8 Outputs)",
+                    category: "Power Distribution Board",
+                    spec: "Heavy Copper 140A Continuous &bull; 8 Pairs",
+                    description: "Multi-layer power distribution bus distributing 22.2V DC to all 8 ESC modules with minimal voltage drop.",
+                    pins: ["Main 6S Input", "8x ESC V+", "8x ESC GND"],
+                    voltage: "22.2V High-Current",
+                  })
+                }
+                onMouseEnter={() => setHoveredNet("Power (V+) - 22.2 V (6S)")}
+                onMouseLeave={() => setHoveredNet(null)}
+              >
+                {/* Gold corner solder pads */}
+                <div className="w-full flex justify-between px-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                </div>
+                <div>
+                  <div className="text-[10px] font-black text-white">PDB</div>
+                  <div className="text-[8px] font-mono text-amber-400 font-bold">
+                    (8 Outputs)
                   </div>
                 </div>
-
-                {/* Status Callout */}
-                <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/20 text-xs text-sky-300 space-y-1">
-                  <div className="font-bold flex items-center gap-1.5">
-                    <CheckCircle2 size={13} className="text-sky-400" />
-                    <span>Isolated DShot Loop</span>
-                  </div>
-                  <p className="text-[10px] text-gray-400 leading-snug font-sans">
-                    Digital motor signals bypass analog ground loops, eliminating ESC calibration and motor jitter entirely.
-                  </p>
+                <div className="w-full flex justify-between px-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                 </div>
               </div>
             </div>
 
-            {/* COLUMN 3: 8x COAXIAL MOTORS & SPEED CONTROLLERS (cols 8..12) */}
-            <div className="col-span-12 md:col-span-4 space-y-3">
-              <div className="flex items-center justify-between pb-1">
-                <span className="text-xs font-bold text-gray-200 uppercase tracking-wider flex items-center gap-1.5">
-                  <RotateCw size={13} className="text-orange-400" />
-                  <span>8× Coaxial Motor Channels</span>
-                </span>
-                <span className="text-[10px] font-mono text-gray-400">
-                  4 Arms • 8 Motors
-                </span>
-              </div>
+            {/* Bottom-Left Viewport Controls */}
+            <div className="absolute bottom-4 left-4 flex items-center gap-1 p-1 rounded-xl bg-black/80 backdrop-blur-md border border-white/15 text-neutral-300 pointer-events-auto shadow-lg z-30">
+              <button
+                onClick={() => setZoomLevel(1.0)}
+                className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 transition text-neutral-300 hover:text-white"
+                title="Fit Canvas"
+              >
+                <Maximize2 size={13} />
+              </button>
+              <button
+                onClick={() => setZoomLevel((z) => Math.min(1.4, z + 0.1))}
+                className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 transition text-xs font-mono font-bold text-neutral-300 hover:text-white"
+                title="Zoom In"
+              >
+                <ZoomIn size={13} />
+              </button>
+              <button
+                onClick={() => setZoomLevel((z) => Math.max(0.7, z - 0.1))}
+                className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 transition text-xs font-mono font-bold text-neutral-300 hover:text-white"
+                title="Zoom Out"
+              >
+                <ZoomOut size={13} />
+              </button>
+              <button
+                onClick={() => setZoomLevel(1.0)}
+                className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 transition text-neutral-300 hover:text-white"
+                title="Reset Scale"
+              >
+                <Crosshair size={13} />
+              </button>
+            </div>
+          </div>
+        </div>
 
-              {/* 4 Coaxial Arm Pods */}
-              <div className="space-y-2.5">
-                {[
-                  { armName: "Arm 1 (Front-Right)", motors: [COAXIAL_MOTORS[0], COAXIAL_MOTORS[1]] },
-                  { armName: "Arm 2 (Front-Left)", motors: [COAXIAL_MOTORS[2], COAXIAL_MOTORS[3]] },
-                  { armName: "Arm 3 (Rear-Left)", motors: [COAXIAL_MOTORS[4], COAXIAL_MOTORS[5]] },
-                  { armName: "Arm 4 (Rear-Right)", motors: [COAXIAL_MOTORS[6], COAXIAL_MOTORS[7]] },
-                ].map((arm, aIdx) => (
+        {/* ================= RIGHT COLUMN: LEGEND, MAPPING TABLE & NOTES ================= */}
+        <div className="xl:col-span-3 space-y-4">
+          {/* Card 1: Wiring Legend */}
+          <div className="rounded-2xl border border-white/10 bg-[#070910] p-4 shadow-xl space-y-2.5">
+            <div className="text-xs font-mono uppercase tracking-wider font-bold text-orange-400 border-b border-white/5 pb-2">
+              Wiring Legend
+            </div>
+
+            <div className="space-y-2 text-xs font-mono">
+              {[
+                { label: "Power (V+) - 22.2 V (6S)", color: "#ef4444" },
+                { label: "Ground (GND)", color: "#475569" },
+                { label: "Motor Phase (A/B/C)", color: "#eab308" },
+                { label: "ESC Signal (PWM / DShot)", color: "#0084ff" },
+                { label: "Telemetry / Data (UART/I²C)", color: "#f97316" },
+                { label: "Other Control / AUX", color: "#cbd5e1" },
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-center gap-2.5 text-neutral-300">
                   <div
-                    key={aIdx}
-                    className="p-3 rounded-xl border border-white/10 bg-[#0d101c] hover:border-orange-500/40 transition"
+                    className="w-7 h-1 rounded-full shrink-0 shadow-sm"
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span className="text-[11px] truncate">{item.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Card 2: ESC – Flight Controller Mapping Table */}
+          <div className="rounded-2xl border border-white/10 bg-[#070910] p-4 shadow-xl space-y-2.5">
+            <div className="text-xs font-mono uppercase tracking-wider font-bold text-orange-400 border-b border-white/5 pb-2">
+              ESC – Flight Controller Mapping
+              <div className="text-[9px] text-neutral-400 font-normal lowercase tracking-normal">
+                (Pixhawk Standard)
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-white/5 overflow-hidden">
+              <table className="w-full text-left text-xs font-mono">
+                <thead className="bg-white/5 text-neutral-400 text-[10px] uppercase border-b border-white/5">
+                  <tr>
+                    <th className="p-2">ESC</th>
+                    <th className="p-2">Motor</th>
+                    <th className="p-2 text-right">FC Output</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5 text-neutral-300 text-[11px]">
+                  {motorPositions.map((p) => (
+                    <tr
+                      key={p.id}
+                      className="hover:bg-white/[0.04] transition cursor-pointer"
+                      onClick={() =>
+                        setHoveredNet(`ESC Signal ${p.escLabel} -> ${p.fcPin}`)
+                      }
+                    >
+                      <td className="p-2 font-bold text-white">{p.escLabel}</td>
+                      <td className="p-2 text-orange-400 font-bold">{p.mLabel}</td>
+                      <td className="p-2 text-right text-sky-400 font-bold">{p.fcPin}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Card 3: Notes Card */}
+          <div className="rounded-2xl border border-white/10 bg-[#070910] p-4 shadow-xl space-y-2.5">
+            <div className="text-xs font-mono uppercase tracking-wider font-bold text-orange-400 flex items-center gap-1.5 border-b border-white/5 pb-2">
+              <Info size={14} />
+              <span>Notes</span>
+            </div>
+
+            <ul className="space-y-2 text-[11px] text-neutral-300 font-sans leading-relaxed">
+              <li className="flex items-start gap-2">
+                <span className="text-orange-400 mt-1">&bull;</span>
+                <span>Use 6S LiPo with suitable current rating (&ge; 40C).</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-orange-400 mt-1">&bull;</span>
+                <span>ESC rating should be &ge; motor load (40A – 60A).</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-orange-400 mt-1">&bull;</span>
+                <span>Power Module provides stable 5V to Flight Controller.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-orange-400 mt-1">&bull;</span>
+                <span>Keep power and signal wires separately routed.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-orange-400 mt-1">&bull;</span>
+                <span>Use reliable connectors (XT60/XT90) and proper wire gauge (12 – 14 AWG for main power).</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* ================= COMPONENT DETAIL MODAL / DRAWER ================= */}
+      {selectedComp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="max-w-md w-full rounded-2xl border border-white/20 bg-[#0c101a] p-5 shadow-2xl space-y-4 text-white">
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 font-bold">
+                  {selectedComp.voltage}
+                </span>
+                <h3 className="text-lg font-black text-white mt-1.5">{selectedComp.title}</h3>
+                <p className="text-xs text-neutral-400 font-mono">{selectedComp.category}</p>
+              </div>
+              <button
+                onClick={() => setSelectedComp(null)}
+                className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-neutral-300 flex items-center justify-center text-xs cursor-pointer"
+              >
+                &times;
+              </button>
+            </div>
+
+            <p className="text-xs text-neutral-300 leading-relaxed">{selectedComp.description}</p>
+
+            <div className="space-y-1.5 pt-2 border-t border-white/10">
+              <div className="text-[10px] font-mono uppercase text-neutral-400">Connected Pinouts / Ports:</div>
+              <div className="flex flex-wrap gap-1.5">
+                {selectedComp.pins.map((pin, i) => (
+                  <span
+                    key={i}
+                    className="text-[10px] font-mono px-2 py-0.5 rounded bg-black/60 border border-white/10 text-neutral-200"
                   >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold text-gray-200">{arm.armName}</span>
-                      <span className="text-[9px] font-mono text-orange-400 font-bold bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/20">
-                        Coaxial Pair
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      {arm.motors.map((m) => {
-                        const isCw = m.rotation === "CW";
-                        const isSelected = selectedMotorId === m.id;
-
-                        return (
-                          <div
-                            key={m.id}
-                            onClick={() => setSelectedMotorId(isSelected ? null : m.id)}
-                            onMouseEnter={() => setHoveredNet(`M${m.id} ${m.position} (${m.rotation}) via ${m.pixhawkPin}`)}
-                            onMouseLeave={() => setHoveredNet(null)}
-                            className={`p-2 rounded-lg border text-left cursor-pointer transition ${
-                              isSelected || hoveredNet?.includes(`M${m.id}`)
-                                ? "bg-orange-500/20 border-orange-500 shadow-md ring-1 ring-orange-500"
-                                : "bg-black/40 border-white/5 hover:border-white/20"
-                            }`}
-                          >
-                            <div className="flex items-center justify-between text-[11px] font-bold">
-                              <span className="text-white">M{m.id} ({m.position})</span>
-                              <span
-                                className={`flex items-center gap-0.5 text-[9px] font-mono font-bold px-1 rounded ${
-                                  isCw ? "text-orange-400 bg-orange-500/15" : "text-cyan-400 bg-cyan-500/15"
-                                }`}
-                              >
-                                {isCw ? <RotateCw size={9} /> : <RotateCcw size={9} />}
-                                <span>{m.rotation}</span>
-                              </span>
-                            </div>
-
-                            <div className="text-[10px] text-gray-400 font-mono mt-1 space-y-0.5">
-                              <div>Port: <span className="text-gray-200">{m.pixhawkPin}</span></div>
-                              <div>Speed: <span className="text-emerald-400">400KV BLDC</span></div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
+                    {pin}
+                  </span>
                 ))}
               </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* ================= 3. WIRING COLOR CODE & QUICK CONNECTION TABLE ================= */}
-      <div
-        className={`p-4 sm:p-6 border-t space-y-4 ${
-          isLight ? "bg-slate-50 border-slate-200" : "bg-[#0b0e18] border-white/10"
-        }`}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-orange-400">
-              Color-Coded Wiring Standard & Electrical Rules
-            </span>
-          </div>
-          <span className="text-xs font-mono text-gray-400">
-            Guaranteed Optical Noise Isolation
-          </span>
-        </div>
-
-        {/* 5 Wire Color Conventions */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-xs font-mono">
-          <div className="p-3 rounded-xl border border-red-500/30 bg-red-500/10 space-y-1">
-            <div className="flex items-center gap-2 font-bold text-red-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
-              <span>+22.2V DC (VBAT)</span>
-            </div>
-            <p className="text-[10px] text-gray-300">10 AWG Heavy Silicone from 6S Battery to PDB-HEX.</p>
-          </div>
-
-          <div className="p-3 rounded-xl border border-slate-500/30 bg-slate-500/10 space-y-1">
-            <div className="flex items-center gap-2 font-bold text-slate-300">
-              <span className="w-2.5 h-2.5 rounded-full bg-slate-400" />
-              <span>GND Common Ground</span>
-            </div>
-            <p className="text-[10px] text-gray-300">Continuous 4-layer copper return path with zero ground loops.</p>
-          </div>
-
-          <div className="p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 space-y-1">
-            <div className="flex items-center gap-2 font-bold text-amber-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-              <span>+5.2V Regulated</span>
-            </div>
-            <p className="text-[10px] text-gray-300">Dual PM06 BEC modules powering Pixhawk 6C Power 1 & 2.</p>
-          </div>
-
-          <div className="p-3 rounded-xl border border-cyan-500/30 bg-cyan-500/10 space-y-1">
-            <div className="flex items-center gap-2 font-bold text-cyan-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-cyan-400" />
-              <span>DShot600 Digital</span>
-            </div>
-            <p className="text-[10px] text-gray-300">Pixhawk MAIN 1..8 to ESCs with 3.3V logic line isolation.</p>
-          </div>
-
-          <div className="p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 space-y-1">
-            <div className="flex items-center gap-2 font-bold text-emerald-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-              <span>CAN Bus Pair</span>
-            </div>
-            <p className="text-[10px] text-gray-300">CAN H / CAN L twisted pair for centimetre-accurate RTK GPS.</p>
-          </div>
-        </div>
-
-        {/* Safety Callouts */}
-        <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/10 flex items-start gap-3">
-          <ShieldAlert size={18} className="text-amber-400 shrink-0 mt-0.5" />
-          <div className="space-y-1 text-xs text-amber-200">
-            <div className="font-bold">Crucial Coaxial Assembly Directives:</div>
-            <div className="text-[11px] leading-relaxed text-amber-200/90 font-sans">
-              1. <strong>Anti-Spark Pre-Charge:</strong> Always connect the green female XT90-S socket first to prevent 6S capacitive arc welding.
-              <br />
-              2. <strong>Coaxial Motor Direction:</strong> On every arm, ensure the <em>Top</em> motor and <em>Bottom</em> motor spin in <strong>opposite directions</strong> (e.g. Arm 1 Top = CW, Bottom = CCW) to neutralize aerodynamic torque.
-              <br />
-              3. <strong>Motor Loss Redundancy:</strong> If any single motor suffers loss in flight, PX4/ArduPilot auto-increases the coaxial twin&apos;s throttle by 35% to prevent spinout.
+            <div className="pt-2 border-t border-white/10 space-y-2">
+              <div className="text-[10px] font-mono uppercase text-neutral-400">Buy Component (Indian Sourcing):</div>
+              <BuyLinkButtons componentName={selectedComp.title} compact={false} />
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

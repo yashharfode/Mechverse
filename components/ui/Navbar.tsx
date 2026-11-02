@@ -28,6 +28,7 @@ import {
   Sliders,
 } from "lucide-react";
 import { MachineId, AppTheme } from "@/types/machine";
+import { isModelVisible } from "@/constants/modelVisibility";
 
 interface NavbarProps {
   currentTab: "landing" | "home" | "explore" | "builder";
@@ -163,9 +164,10 @@ export default function Navbar({
   const [isCatalogModalOpen, setIsCatalogModalOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Active Project Data
+  // Active Project Data (Filter by visibility)
+  const visibleProjectLibrary = PROJECT_LIBRARY.filter((p) => isModelVisible(p.id));
   const activeProject =
-    PROJECT_LIBRARY.find((p) => p.id === selectedMachineId) || PROJECT_LIBRARY[0];
+    visibleProjectLibrary.find((p) => p.id === selectedMachineId) || visibleProjectLibrary[0];
   const ActiveIcon = activeProject.icon;
 
   // Close dropdown on outside click
@@ -267,7 +269,7 @@ export default function Navbar({
             <Grid size={13} className="text-orange-400 shrink-0" />
             <span className="hidden md:inline">View Catalog</span>
             <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-orange-500/20 text-orange-400 font-bold border border-orange-500/30">
-              9
+              {visibleProjectLibrary.length}
             </span>
           </button>
 
@@ -289,7 +291,7 @@ export default function Navbar({
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   <span className="text-[10px] font-mono uppercase tracking-wider font-bold text-gray-400">
-                    Project Library (9 Machines)
+                    Project Library ({visibleProjectLibrary.length} Machines)
                   </span>
                 </div>
                 <button
@@ -306,7 +308,7 @@ export default function Navbar({
 
               {/* Machine Items List */}
               <div className="max-h-[380px] overflow-y-auto custom-scrollbar space-y-1.5 py-1 pr-0.5">
-                {PROJECT_LIBRARY.map((item) => {
+                {visibleProjectLibrary.map((item) => {
                   const ItemIcon = item.icon;
                   const isSelected = selectedMachineId === item.id;
 
@@ -557,10 +559,10 @@ export default function Navbar({
             </button>
           </div>
 
-          {/* Modal Body - 9 Machine Cards Grid */}
+          {/* Modal Body - Machine Cards Grid */}
           <div className="p-4 sm:p-6 overflow-y-auto custom-scrollbar flex-1">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {PROJECT_LIBRARY.map((item) => {
+              {visibleProjectLibrary.map((item) => {
                 const ItemIcon = item.icon;
                 const isSelected = selectedMachineId === item.id;
 
