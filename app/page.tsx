@@ -770,7 +770,11 @@ export default function Home() {
 
             {/* Content Area Based on Robot Workshop Tab */}
             {selectedMachineId === "walking-robot" && robotProjectTab !== "simulator" ? (
-              <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#090b0f]">
+              <div
+                className={`flex-1 overflow-y-auto custom-scrollbar ${
+                  theme === "light" ? "bg-slate-50 text-slate-900" : "bg-[#090b0f] text-white"
+                }`}
+              >
                 {robotProjectTab === "how-it-works" && <RobotHowItWorks />}
                 {robotProjectTab === "build-guide" && <RobotBuildGuide />}
                 {robotProjectTab === "free-sourcing" && <RobotFreeSourcing />}
@@ -780,7 +784,11 @@ export default function Home() {
               </div>
             ) : selectedMachineId === "robo-rumble" && roboRumbleProjectTab !== "simulator" ? (
               /* Content Area Based on Robo Rumble Workshop Tab */
-              <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#090b0f]">
+              <div
+                className={`flex-1 overflow-y-auto custom-scrollbar ${
+                  theme === "light" ? "bg-slate-50 text-slate-900" : "bg-[#090b0f] text-white"
+                }`}
+              >
                 {roboRumbleProjectTab === "how-it-works" && <RoboRumbleHowItWorks />}
                 {roboRumbleProjectTab === "build-guide" && <RoboRumbleBuildGuide />}
                 {roboRumbleProjectTab === "free-sourcing" && <RoboRumbleFreeSourcing />}
@@ -790,7 +798,11 @@ export default function Home() {
               </div>
             ) : selectedMachineId === "aero-450" && aeroProjectTab !== "explorer" ? (
               /* Content Area Based on AERO-450 Workshop Tab */
-              <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#090b0f]">
+              <div
+                className={`flex-1 overflow-y-auto custom-scrollbar ${
+                  theme === "light" ? "bg-slate-50 text-slate-900" : "bg-[#090b0f] text-white"
+                }`}
+              >
                 {aeroProjectTab === "overview" && (
                   <AeroOverview customization={customization} onNavigateTab={setAeroProjectTab} />
                 )}
@@ -880,7 +892,13 @@ export default function Home() {
                 {/* Robo Rumble Mode Sub-Bar (Explorer / Arena / Track / Customizer / Compare) - positioned cleanly below ControlsHeader so Exploded / View buttons are never hidden */}
                 {selectedMachineId === "robo-rumble" && (
                   <div className="absolute top-14 sm:top-16 left-1/2 -translate-x-1/2 z-20 pointer-events-auto">
-                    <div className="flex items-center gap-1 bg-black/80 border border-white/15 p-1 rounded-2xl backdrop-blur-xl shadow-2xl">
+                    <div
+                      className={`flex items-center gap-1 p-1 rounded-2xl backdrop-blur-xl transition ${
+                        theme === "light"
+                          ? "bg-white/90 border border-slate-200 shadow-md text-slate-800"
+                          : "bg-black/80 border border-white/15 shadow-2xl text-white"
+                      }`}
+                    >
                       {[
                         { id: "explorer", label: "3D CAD Explorer", icon: "🔍" },
                         { id: "arena", label: "Battle Arena", icon: "⚔️" },
@@ -891,9 +909,11 @@ export default function Home() {
                         <button
                           key={m.id}
                           onClick={() => setRoboSimulatorMode(m.id as any)}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
                             roboSimulatorMode === m.id
                               ? "bg-rose-600 text-white shadow-lg shadow-rose-600/30"
+                              : theme === "light"
+                              ? "text-slate-600 hover:text-slate-950 hover:bg-slate-100"
                               : "text-gray-400 hover:text-white hover:bg-white/5"
                           }`}
                         >
@@ -1014,7 +1034,11 @@ export default function Home() {
                   </div>
                 ) : selectedMachineId === "robo-rumble" && roboSimulatorMode === "customizer" ? (
                   /* Embedded Customizer Studio */
-                  <div className="w-full h-full overflow-y-auto custom-scrollbar bg-[#090b0f] pt-14">
+                  <div
+                    className={`w-full h-full overflow-y-auto custom-scrollbar pt-14 ${
+                      theme === "light" ? "bg-slate-50 text-slate-900" : "bg-[#090b0f] text-white"
+                    }`}
+                  >
                     <RoboRumbleCustomizer
                       customization={customization}
                       onChangeCustomization={setCustomization}
@@ -1023,7 +1047,11 @@ export default function Home() {
                   </div>
                 ) : selectedMachineId === "robo-rumble" && roboSimulatorMode === "compare" ? (
                   /* Embedded Comparison Studio */
-                  <div className="w-full h-full overflow-y-auto custom-scrollbar bg-[#090b0f] pt-14">
+                  <div
+                    className={`w-full h-full overflow-y-auto custom-scrollbar pt-14 ${
+                      theme === "light" ? "bg-slate-50 text-slate-900" : "bg-[#090b0f] text-white"
+                    }`}
+                  >
                     <RoboRumbleComparison />
                   </div>
                 ) : (
@@ -1203,6 +1231,7 @@ export default function Home() {
                               setExplosionLevel(0.6);
                             }
                           }}
+                          theme={theme}
                         />
                       )}
 
@@ -1246,6 +1275,7 @@ export default function Home() {
                             customization={customization}
                             onChangeCustomization={setCustomization}
                             onSaveDesign={handleSaveDesign}
+                            theme={theme}
                           />
                         )}
                       </>
@@ -1257,6 +1287,7 @@ export default function Home() {
                       onSelectPreset={setCameraPreset}
                       onResetCamera={() => setCameraResetCount((c) => c + 1)}
                       viewportRef={viewportContainerRef}
+                      theme={theme}
                     />
                   </>
                 )}
@@ -1273,6 +1304,7 @@ export default function Home() {
         savedDesigns={savedDesigns}
         onLoadDesign={handleApplySavedDesign}
         onDeleteDesign={handleDeleteDesign}
+        theme={theme}
       />
 
       {/* Global Interactive Web AR Modal */}

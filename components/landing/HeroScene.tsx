@@ -5,13 +5,14 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { ArrowRight, ChevronDown, Camera } from "lucide-react";
-import { CustomizationSettings, MachineId, RobotSimulationState } from "@/types/machine";
+import { AppTheme, CustomizationSettings, MachineId, RobotSimulationState } from "@/types/machine";
 import { TOKENS } from "@/constants/designTokens";
 import DroneBModel from "@/components/3d/DroneBModel";
 import RoboRumbleVehicleModel from "@/components/3d/RoboRumbleVehicleModel";
 import WalkingRobotModel from "@/components/3d/WalkingRobotModel";
 
 interface HeroSceneProps {
+  theme?: AppTheme;
   onLaunchStudio: (machineId?: MachineId) => void;
   onOpenAR?: (machineId?: MachineId) => void;
 }
@@ -46,11 +47,14 @@ function IndustrialStudioStage({
   hoveredMachine,
   onHoverMachine,
   onSelectMachine,
+  theme = "dark",
 }: {
   hoveredMachine: MachineId | null;
   onHoverMachine: (id: MachineId | null) => void;
   onSelectMachine: (id: MachineId) => void;
+  theme?: AppTheme;
 }) {
+  const isLight = theme === "light";
   const droneGroupRef = useRef<THREE.Group>(null);
   const combatBotGroupRef = useRef<THREE.Group>(null);
   const walkerGroupRef = useRef<THREE.Group>(null);
@@ -259,41 +263,57 @@ function IndustrialStudioStage({
       <mesh position={[0, -0.605, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[28, 28]} />
         <meshStandardMaterial
-          color="#060709"
-          roughness={0.15}
-          metalness={0.85}
+          color={isLight ? "#e2e8f0" : "#060709"}
+          roughness={isLight ? 0.35 : 0.15}
+          metalness={isLight ? 0.05 : 0.85}
         />
       </mesh>
 
       {/* Subtle Engineering Grid on floor */}
-      <gridHelper args={[24, 48, "#222a36", "#0e1218"]} position={[0, -0.60, 0]} />
+      <gridHelper
+        args={[24, 48, isLight ? "#94a3b8" : "#222a36", isLight ? "#cbd5e1" : "#0e1218"]}
+        position={[0, -0.60, 0]}
+      />
     </>
   );
 }
 
-export default function HeroScene({ onLaunchStudio, onOpenAR }: HeroSceneProps) {
+export default function HeroScene({ onLaunchStudio, onOpenAR, theme = "dark" }: HeroSceneProps) {
+  const isLight = theme === "light";
   const [hoveredMachine, setHoveredMachine] = useState<MachineId | null>(null);
 
   return (
     <section
       id="hero"
-      className="relative w-full h-[100svh] min-h-[640px] flex flex-col justify-between overflow-hidden bg-[#07080A] select-none"
+      className={`relative w-full h-[100svh] min-h-[640px] flex flex-col justify-between overflow-hidden select-none transition-colors duration-300 ${
+        isLight ? "bg-[#f8fafc]" : "bg-[#07080A]"
+      }`}
     >
       {/* Background Studio Vignette Gradient */}
       <div
         className="absolute inset-0 pointer-events-none z-10"
         style={{
-          background: `
-            radial-gradient(circle at 50% 20%, rgba(255,255,255,0.03) 0%, transparent 60%),
-            radial-gradient(circle at 50% 75%, rgba(255,106,26,0.06) 0%, transparent 50%),
-            linear-gradient(to bottom, rgba(7,8,10,0.85) 0%, transparent 18%, transparent 80%, rgba(7,8,10,0.98) 100%)
-          `,
+          background: isLight
+            ? `
+              radial-gradient(circle at 50% 20%, rgba(0,0,0,0.02) 0%, transparent 60%),
+              radial-gradient(circle at 50% 75%, rgba(255,106,26,0.05) 0%, transparent 50%),
+              linear-gradient(to bottom, rgba(248,250,252,0.85) 0%, transparent 18%, transparent 80%, rgba(248,250,252,0.98) 100%)
+            `
+            : `
+              radial-gradient(circle at 50% 20%, rgba(255,255,255,0.03) 0%, transparent 60%),
+              radial-gradient(circle at 50% 75%, rgba(255,106,26,0.06) 0%, transparent 50%),
+              linear-gradient(to bottom, rgba(7,8,10,0.85) 0%, transparent 18%, transparent 80%, rgba(7,8,10,0.98) 100%)
+            `,
         }}
       />
 
       {/* ================= 1. EDITORIAL HEADLINE & SANS SUBTITLE (CLEAN HIERARCHY) ================= */}
-      <div className="relative z-20 w-full pt-20 sm:pt-24 md:pt-26 lg:pt-28 text-center px-4 flex flex-col items-center pointer-events-none">
-        <h1 className="font-serif-headline text-2xl sm:text-4xl md:text-5xl lg:text-[2.65rem] tracking-[0.04em] text-white uppercase font-normal leading-snug sm:leading-[1.12] select-text max-w-3xl">
+      <div className="relative z-20 w-full pt-24 sm:pt-28 md:pt-32 lg:pt-32 text-center px-4 flex flex-col items-center pointer-events-none">
+        <h1
+          className={`font-serif-headline text-2xl sm:text-4xl md:text-5xl lg:text-[2.65rem] tracking-[0.04em] uppercase font-normal leading-snug sm:leading-[1.12] select-text max-w-3xl ${
+            isLight ? "text-slate-900" : "text-white"
+          }`}
+        >
           FOR THOSE WHO
           <br />
           <span className="italic font-bold text-[#FF6A1A] mr-2 sm:mr-3">BUILD</span>
@@ -301,7 +321,11 @@ export default function HeroScene({ onLaunchStudio, onOpenAR }: HeroSceneProps) 
         </h1>
 
         {/* Clean Editorial Subtitle - Guaranteed clearance from 3D models */}
-        <p className="mt-2.5 text-xs sm:text-sm font-sans tracking-[0.22em] text-[#94A3B8] font-medium uppercase select-text">
+        <p
+          className={`mt-2.5 text-xs sm:text-sm font-sans tracking-[0.22em] font-medium uppercase select-text ${
+            isLight ? "text-slate-600" : "text-[#94A3B8]"
+          }`}
+        >
           Design. Simulate. Build real machines.
         </p>
       </div>
@@ -318,6 +342,7 @@ export default function HeroScene({ onLaunchStudio, onOpenAR }: HeroSceneProps) 
               hoveredMachine={hoveredMachine}
               onHoverMachine={setHoveredMachine}
               onSelectMachine={(id) => onLaunchStudio(id)}
+              theme={theme}
             />
             <OrbitControls
               enableZoom={false}
@@ -346,17 +371,31 @@ export default function HeroScene({ onLaunchStudio, onOpenAR }: HeroSceneProps) 
               hoveredMachine === "robo-rumble" ? "scale-105" : "opacity-90 hover:opacity-100"
             }`}
           >
-            <div className="bg-[#0b0e16]/85 hover:bg-[#111624]/95 border border-white/10 hover:border-orange-500/60 shadow-[0_15px_40px_rgba(0,0,0,0.75)] backdrop-blur-xl px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl transition-all duration-300 flex flex-col gap-1 max-w-[210px] sm:max-w-[240px]">
+            <div
+              className={`border backdrop-blur-xl px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl transition-all duration-300 flex flex-col gap-1 max-w-[210px] sm:max-w-[240px] ${
+                isLight
+                  ? "bg-white/95 hover:bg-white border-slate-200/90 hover:border-orange-500/60 shadow-[0_15px_30px_rgba(0,0,0,0.08)]"
+                  : "bg-[#0b0e16]/85 hover:bg-[#111624]/95 border-white/10 hover:border-orange-500/60 shadow-[0_15px_40px_rgba(0,0,0,0.75)]"
+              }`}
+            >
               <div className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shadow-[0_0_8px_#ff6a1a]" />
-                <span className="text-[9px] font-mono font-bold tracking-wider uppercase text-orange-400">
+                <span className="text-[9px] font-mono font-bold tracking-wider uppercase text-orange-500">
                   Combat Robotics
                 </span>
               </div>
-              <h3 className="text-xs sm:text-sm font-sans font-bold text-white tracking-normal group-hover:text-orange-300 transition-colors whitespace-nowrap">
+              <h3
+                className={`text-xs sm:text-sm font-sans font-bold tracking-normal group-hover:text-orange-500 transition-colors whitespace-nowrap ${
+                  isLight ? "text-slate-900" : "text-white"
+                }`}
+              >
                 Robo-Rumble Bot
               </h3>
-              <p className="text-[10px] sm:text-[11px] font-sans text-slate-400 leading-snug">
+              <p
+                className={`text-[10px] sm:text-[11px] font-sans leading-snug ${
+                  isLight ? "text-slate-600" : "text-slate-400"
+                }`}
+              >
                 1.5kg Beetleweight • 4WD Ramp
               </p>
             </div>
@@ -373,17 +412,31 @@ export default function HeroScene({ onLaunchStudio, onOpenAR }: HeroSceneProps) 
               hoveredMachine === "drone-b" ? "scale-105" : "opacity-95 hover:opacity-100"
             }`}
           >
-            <div className="bg-[#0b0e16]/85 hover:bg-[#111624]/95 border border-white/10 hover:border-orange-500/60 shadow-[0_15px_40px_rgba(0,0,0,0.75)] backdrop-blur-xl px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl transition-all duration-300 flex flex-col items-center gap-1">
+            <div
+              className={`border backdrop-blur-xl px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl transition-all duration-300 flex flex-col items-center gap-1 ${
+                isLight
+                  ? "bg-white/95 hover:bg-white border-slate-200/90 hover:border-orange-500/60 shadow-[0_15px_30px_rgba(0,0,0,0.08)]"
+                  : "bg-[#0b0e16]/85 hover:bg-[#111624]/95 border-white/10 hover:border-orange-500/60 shadow-[0_15px_40px_rgba(0,0,0,0.75)]"
+              }`}
+            >
               <div className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse shadow-[0_0_8px_#ff6a1a]" />
-                <span className="text-[9px] font-mono font-bold tracking-wider uppercase text-orange-400">
+                <span className="text-[9px] font-mono font-bold tracking-wider uppercase text-orange-500">
                   Autonomous UAV
                 </span>
               </div>
-              <h3 className="text-xs sm:text-sm font-sans font-bold text-white tracking-normal group-hover:text-orange-300 transition-colors whitespace-nowrap">
+              <h3
+                className={`text-xs sm:text-sm font-sans font-bold tracking-normal group-hover:text-orange-500 transition-colors whitespace-nowrap ${
+                  isLight ? "text-slate-900" : "text-white"
+                }`}
+              >
                 Drone-B Heavy Octocopter
               </h3>
-              <p className="text-[10px] sm:text-[11px] font-sans text-slate-400 leading-snug whitespace-nowrap">
+              <p
+                className={`text-[10px] sm:text-[11px] font-sans leading-snug whitespace-nowrap ${
+                  isLight ? "text-slate-600" : "text-slate-400"
+                }`}
+              >
                 Coaxial Carbon Hull • 400Hz Flight Avionics
               </p>
             </div>
@@ -400,17 +453,31 @@ export default function HeroScene({ onLaunchStudio, onOpenAR }: HeroSceneProps) 
               hoveredMachine === "walking-robot" ? "scale-105" : "opacity-90 hover:opacity-100"
             }`}
           >
-            <div className="bg-[#0b0e16]/85 hover:bg-[#111624]/95 border border-white/10 hover:border-cyan-500/60 shadow-[0_15px_40px_rgba(0,0,0,0.75)] backdrop-blur-xl px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl transition-all duration-300 flex flex-col items-end gap-1 max-w-[210px] sm:max-w-[240px]">
+            <div
+              className={`border backdrop-blur-xl px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl transition-all duration-300 flex flex-col items-end gap-1 max-w-[210px] sm:max-w-[240px] ${
+                isLight
+                  ? "bg-white/95 hover:bg-white border-slate-200/90 hover:border-cyan-500/60 shadow-[0_15px_30px_rgba(0,0,0,0.08)]"
+                  : "bg-[#0b0e16]/85 hover:bg-[#111624]/95 border-white/10 hover:border-cyan-500/60 shadow-[0_15px_40px_rgba(0,0,0,0.75)]"
+              }`}
+            >
               <div className="flex items-center gap-1.5">
-                <span className="text-[9px] font-mono font-bold tracking-wider uppercase text-cyan-400">
+                <span className="text-[9px] font-mono font-bold tracking-wider uppercase text-cyan-500">
                   Kinematic Linkage
                 </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 shadow-[0_0_8px_#22d3ee]" />
               </div>
-              <h3 className="text-xs sm:text-sm font-sans font-bold text-white tracking-normal group-hover:text-cyan-300 transition-colors whitespace-nowrap">
+              <h3
+                className={`text-xs sm:text-sm font-sans font-bold tracking-normal group-hover:text-cyan-500 transition-colors whitespace-nowrap ${
+                  isLight ? "text-slate-900" : "text-white"
+                }`}
+              >
                 Walker-TJ Strandbeest
               </h3>
-              <p className="text-[10px] sm:text-[11px] font-sans text-slate-400 leading-snug">
+              <p
+                className={`text-[10px] sm:text-[11px] font-sans leading-snug ${
+                  isLight ? "text-slate-600" : "text-slate-400"
+                }`}
+              >
                 8-Leg Jansen Mechanism • Geared DC
               </p>
             </div>
@@ -441,10 +508,14 @@ export default function HeroScene({ onLaunchStudio, onOpenAR }: HeroSceneProps) 
             <ArrowRight size={14} />
           </a>
 
-          {/* Secondary Dark Glass Button: ENTER 3D STUDIO */}
+          {/* Secondary Button: ENTER 3D STUDIO */}
           <button
             onClick={() => onLaunchStudio()}
-            className="w-full sm:w-auto text-center justify-center px-6 sm:px-7 py-3 sm:py-3.5 rounded-full text-xs font-mono-tech font-medium tracking-wider text-white bg-[#0F1114]/85 backdrop-blur-md border border-white/20 hover:border-white/50 hover:bg-[#161A1F] transition-all transform active:scale-95 cursor-pointer uppercase shadow-lg"
+            className={`w-full sm:w-auto text-center justify-center px-6 sm:px-7 py-3 sm:py-3.5 rounded-full text-xs font-mono-tech font-medium tracking-wider backdrop-blur-md border transition-all transform active:scale-95 cursor-pointer uppercase shadow-lg ${
+              isLight
+                ? "text-slate-900 bg-white/95 border-slate-300 hover:border-slate-400 hover:bg-slate-100"
+                : "text-white bg-[#0F1114]/85 border-white/20 hover:border-white/50 hover:bg-[#161A1F]"
+            }`}
           >
             <span>ENTER 3D STUDIO</span>
           </button>
@@ -452,7 +523,9 @@ export default function HeroScene({ onLaunchStudio, onOpenAR }: HeroSceneProps) 
           {/* Web AR Interactive Experience Button */}
           <button
             onClick={() => (onOpenAR ? onOpenAR("drone-b") : onLaunchStudio("drone-b"))}
-            className="w-full sm:w-auto text-center justify-center px-5 sm:px-6 py-3 sm:py-3.5 rounded-full text-xs font-mono-tech font-semibold tracking-wider text-[#FF6A1A] bg-[#0F1114]/90 backdrop-blur-md border border-[#FF6A1A]/40 hover:border-[#FF6A1A] hover:bg-[#FF6A1A]/10 transition-all transform active:scale-95 cursor-pointer uppercase shadow-lg flex items-center gap-2"
+            className={`w-full sm:w-auto text-center justify-center px-5 sm:px-6 py-3 sm:py-3.5 rounded-full text-xs font-mono-tech font-semibold tracking-wider text-[#FF6A1A] backdrop-blur-md border border-[#FF6A1A]/40 hover:border-[#FF6A1A] hover:bg-[#FF6A1A]/10 transition-all transform active:scale-95 cursor-pointer uppercase shadow-lg flex items-center gap-2 ${
+              isLight ? "bg-white/95" : "bg-[#0F1114]/90"
+            }`}
           >
             <Camera size={14} />
             <span>VIEW IN AR</span>
@@ -468,16 +541,27 @@ export default function HeroScene({ onLaunchStudio, onOpenAR }: HeroSceneProps) 
               target.scrollIntoView({ behavior: "smooth", block: "start" });
             }
           }}
-          className="flex flex-col items-center gap-1.5 text-slate-400 hover:text-white transition-all duration-300 cursor-pointer pt-1 group"
+          className={`flex flex-col items-center gap-1.5 transition-all duration-300 cursor-pointer pt-1 group ${
+            isLight ? "text-slate-500 hover:text-slate-900" : "text-slate-400 hover:text-white"
+          }`}
           aria-label="Scroll Down to Reveal Section"
         >
-          <span className="text-[10px] font-mono-tech tracking-widest uppercase opacity-75 group-hover:opacity-100 group-hover:text-orange-400 transition-all">
+          <span className="text-[10px] font-mono-tech tracking-widest uppercase opacity-75 group-hover:opacity-100 group-hover:text-orange-500 transition-all">
             Scroll to Explore
           </span>
-          <div className="w-4 h-7 rounded-full border border-white/30 group-hover:border-orange-500/80 flex items-start justify-center p-1 transition-colors">
+          <div
+            className={`w-4 h-7 rounded-full border group-hover:border-orange-500/80 flex items-start justify-center p-1 transition-colors ${
+              isLight ? "border-slate-400" : "border-white/30"
+            }`}
+          >
             <div className="w-1 h-1.5 rounded-full bg-orange-400 animate-bounce mt-0.5 shadow-[0_0_6px_#ff6a1a]" />
           </div>
-          <ChevronDown size={14} className="text-white/40 group-hover:text-orange-400 -mt-0.5 transition-colors" />
+          <ChevronDown
+            size={14}
+            className={`group-hover:text-orange-500 -mt-0.5 transition-colors ${
+              isLight ? "text-slate-400" : "text-white/40"
+            }`}
+          />
         </button>
       </div>
     </section>

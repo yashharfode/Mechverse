@@ -3,11 +3,12 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, ArrowRight, Cpu, Radio, Zap, Scale, CheckCircle2 } from "lucide-react";
-import { MachineId } from "@/types/machine";
+import { AppTheme, MachineId } from "@/types/machine";
 import { TOKENS } from "@/constants/designTokens";
 
 interface MachineShowcaseProps {
   onLaunchStudio: (machineId: MachineId) => void;
+  theme?: AppTheme;
 }
 
 interface ShowcaseItem {
@@ -149,7 +150,8 @@ const SHOWCASE_ITEMS: ShowcaseItem[] = [
   },
 ];
 
-export default function MachineShowcase({ onLaunchStudio }: MachineShowcaseProps) {
+export default function MachineShowcase({ onLaunchStudio, theme = "dark" }: MachineShowcaseProps) {
+  const isLight = theme === "light";
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const activeItem = SHOWCASE_ITEMS[currentIndex];
 
@@ -167,44 +169,73 @@ export default function MachineShowcase({ onLaunchStudio }: MachineShowcaseProps
   return (
     <section
       id="showcase"
-      className="relative w-full py-16 sm:py-24 px-4 sm:px-6 md:px-12 border-t border-white/5 overflow-hidden"
-      style={{ backgroundColor: "#060709" }}
+      className={`relative w-full py-16 sm:py-24 px-4 sm:px-6 md:px-12 border-t overflow-hidden transition-colors duration-300 ${
+        isLight ? "border-slate-200 bg-[#f8fafc]" : "border-white/5 bg-[#060709]"
+      }`}
     >
       <div className="max-w-7xl mx-auto flex flex-col space-y-8 sm:space-y-10">
         {/* Section Header with Badge & Pagination */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-orange-500/25 bg-[#0F1114]">
+            <div
+              className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border ${
+                isLight ? "border-orange-500/25 bg-orange-50/80" : "border-orange-500/25 bg-[#0F1114]"
+              }`}
+            >
               <span className="w-2 h-2 rounded-full bg-[#FF6A1A]" />
-              <span className="text-[11px] font-mono tracking-widest text-[#9AA0A9] uppercase font-semibold">
+              <span
+                className={`text-[11px] font-mono tracking-widest uppercase font-semibold ${
+                  isLight ? "text-slate-600" : "text-[#9AA0A9]"
+                }`}
+              >
                 MACHINE SHOWCASE
               </span>
             </div>
-            <h2 className="text-2xl sm:text-4xl md:text-5xl font-light text-[#F4F5F7] tracking-tight">
+            <h2
+              className={`text-2xl sm:text-4xl md:text-5xl font-light tracking-tight ${
+                isLight ? "text-slate-900" : "text-[#F4F5F7]"
+              }`}
+            >
               Hardware Engineering{" "}
               <span className="font-semibold text-[#FF6A1A]">Showcase</span>.
             </h2>
-            <p className="text-xs sm:text-sm text-[#9AA0A9] max-w-xl leading-relaxed">
+            <p
+              className={`text-xs sm:text-sm max-w-xl leading-relaxed ${
+                isLight ? "text-slate-600" : "text-[#9AA0A9]"
+              }`}
+            >
               Inspect real, physical machines with component details, live 3D models, real BOMs and step-by-step build guides.
             </p>
           </div>
 
           {/* Pagination Controls */}
           <div className="flex items-center gap-3">
-            <span className="text-sm font-mono text-neutral-400 font-semibold tracking-wider">
+            <span
+              className={`text-sm font-mono font-semibold tracking-wider ${
+                isLight ? "text-slate-500" : "text-neutral-400"
+              }`}
+            >
               {currentNumStr} / {totalNumStr}
             </span>
             <div className="flex items-center gap-1.5">
               <button
                 onClick={handlePrev}
-                className="w-8 h-8 rounded-full border border-white/10 bg-[#0F1114] hover:bg-[#161A1F] hover:border-white/30 flex items-center justify-center text-neutral-300 transition-all cursor-pointer"
+                className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
+                  isLight
+                    ? "border-slate-300 bg-white hover:bg-slate-100 text-slate-700 shadow-sm"
+                    : "border-white/10 bg-[#0F1114] hover:bg-[#161A1F] hover:border-white/30 text-neutral-300"
+                }`}
                 aria-label="Previous Machine"
               >
                 <ChevronLeft size={16} />
               </button>
               <button
                 onClick={handleNext}
-                className="w-8 h-8 rounded-full border border-white/10 bg-[#0F1114] hover:bg-[#161A1F] hover:border-white/30 flex items-center justify-center text-neutral-300 transition-all cursor-pointer"
+                className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
+                  isLight
+                    ? "border-slate-300 bg-white hover:bg-slate-100 text-slate-700 shadow-sm"
+                    : "border-white/10 bg-[#0F1114] hover:bg-[#161A1F] hover:border-white/30 text-neutral-300"
+                }`}
                 aria-label="Next Machine"
               >
                 <ChevronRight size={16} />
@@ -216,11 +247,23 @@ export default function MachineShowcase({ onLaunchStudio }: MachineShowcaseProps
         {/* Two-Column Studio Card */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
           {/* Left Column: Studio Turntable Render */}
-          <div className="lg:col-span-7 rounded-2xl border border-white/10 bg-[#08090C] overflow-hidden relative min-h-[380px] sm:min-h-[460px] flex flex-col shadow-2xl">
+          <div
+            className={`lg:col-span-7 rounded-2xl border overflow-hidden relative min-h-[380px] sm:min-h-[460px] flex flex-col ${
+              isLight
+                ? "border-slate-200 bg-white shadow-xl shadow-slate-200/50"
+                : "border-white/10 bg-[#08090C] shadow-2xl"
+            }`}
+          >
             {/* Top Left Badge */}
-            <div className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-[#0B0D12]/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10">
+            <div
+              className={`absolute top-4 left-4 z-20 flex items-center gap-2 backdrop-blur-md px-3.5 py-1.5 rounded-full border ${
+                isLight
+                  ? "bg-white/90 border-slate-200 text-slate-800 shadow-sm"
+                  : "bg-[#0B0D12]/90 border-white/10 text-[#E2E8F0]"
+              }`}
+            >
               <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
-              <span className="text-[10px] sm:text-xs font-mono text-[#E2E8F0] tracking-wider uppercase font-semibold">
+              <span className="text-[10px] sm:text-xs font-mono tracking-wider uppercase font-semibold">
                 {activeItem.name} • STUDIO TURNTABLE
               </span>
             </div>
@@ -238,27 +281,55 @@ export default function MachineShowcase({ onLaunchStudio }: MachineShowcaseProps
           </div>
 
           {/* Right Column: Hardware Specs, BOM & Launch CTA */}
-          <div className="lg:col-span-5 rounded-2xl border border-white/10 bg-[#0A0D12] p-6 sm:p-8 flex flex-col justify-between shadow-xl space-y-6">
+          <div
+            className={`lg:col-span-5 rounded-2xl border p-6 sm:p-8 flex flex-col justify-between space-y-6 ${
+              isLight
+                ? "border-slate-200 bg-white text-slate-900 shadow-xl shadow-slate-200/50"
+                : "border-white/10 bg-[#0A0D12] text-white shadow-xl"
+            }`}
+          >
             <div className="space-y-4">
               <div className="text-[11px] font-mono tracking-widest text-[#FF6A1A] font-semibold uppercase">
                 {activeItem.category}
               </div>
 
-              <h3 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight">
+              <h3
+                className={`text-2xl sm:text-3xl font-semibold tracking-tight ${
+                  isLight ? "text-slate-900" : "text-white"
+                }`}
+              >
                 {activeItem.name}
               </h3>
 
-              <p className="text-xs sm:text-sm text-[#9AA0A9] leading-relaxed">
+              <p
+                className={`text-xs sm:text-sm leading-relaxed ${
+                  isLight ? "text-slate-600" : "text-[#9AA0A9]"
+                }`}
+              >
                 {activeItem.description}
               </p>
 
               {/* Price / BOM Card */}
-              <div className="p-4 rounded-xl border border-white/10 bg-[#07080B] flex items-center justify-between gap-4">
+              <div
+                className={`p-4 rounded-xl border flex items-center justify-between gap-4 ${
+                  isLight
+                    ? "border-slate-200 bg-slate-50/90 text-slate-900"
+                    : "border-white/10 bg-[#07080B] text-white"
+                }`}
+              >
                 <div>
-                  <div className="text-[10px] font-mono text-[#7B828F] tracking-wider uppercase">
+                  <div
+                    className={`text-[10px] font-mono tracking-wider uppercase ${
+                      isLight ? "text-slate-500" : "text-[#7B828F]"
+                    }`}
+                  >
                     ESTIMATED BUILD COST
                   </div>
-                  <div className="text-2xl font-mono font-bold text-white mt-0.5">
+                  <div
+                    className={`text-2xl font-mono font-bold mt-0.5 ${
+                      isLight ? "text-slate-900" : "text-white"
+                    }`}
+                  >
                     {activeItem.price}
                   </div>
                 </div>
@@ -268,7 +339,11 @@ export default function MachineShowcase({ onLaunchStudio }: MachineShowcaseProps
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                     VERIFIED SUPPLIERS
                   </div>
-                  <div className="text-[9px] text-[#7B828F] mt-1 font-mono max-w-[180px]">
+                  <div
+                    className={`text-[9px] mt-1 font-mono max-w-[180px] ${
+                      isLight ? "text-slate-500" : "text-[#7B828F]"
+                    }`}
+                  >
                     {activeItem.supplierInfo}
                   </div>
                 </div>
@@ -276,42 +351,90 @@ export default function MachineShowcase({ onLaunchStudio }: MachineShowcaseProps
 
               {/* 2x2 Specs Grid */}
               <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="p-3 rounded-xl border border-white/5 bg-[#0D1016]">
-                  <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#7B828F] uppercase">
+                <div
+                  className={`p-3 rounded-xl border ${
+                    isLight ? "border-slate-200 bg-slate-50" : "border-white/5 bg-[#0D1016]"
+                  }`}
+                >
+                  <div
+                    className={`flex items-center gap-1.5 text-[10px] font-mono uppercase ${
+                      isLight ? "text-slate-500" : "text-[#7B828F]"
+                    }`}
+                  >
                     <Cpu size={12} className="text-[#FF6A1A]" />
                     <span>Flight Controller</span>
                   </div>
-                  <div className="text-xs font-mono font-semibold text-[#E2E8F0] mt-1 truncate">
+                  <div
+                    className={`text-xs font-mono font-semibold mt-1 truncate ${
+                      isLight ? "text-slate-800" : "text-[#E2E8F0]"
+                    }`}
+                  >
                     {activeItem.specs.flightController}
                   </div>
                 </div>
 
-                <div className="p-3 rounded-xl border border-white/5 bg-[#0D1016]">
-                  <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#7B828F] uppercase">
+                <div
+                  className={`p-3 rounded-xl border ${
+                    isLight ? "border-slate-200 bg-slate-50" : "border-white/5 bg-[#0D1016]"
+                  }`}
+                >
+                  <div
+                    className={`flex items-center gap-1.5 text-[10px] font-mono uppercase ${
+                      isLight ? "text-slate-500" : "text-[#7B828F]"
+                    }`}
+                  >
                     <Radio size={12} className="text-[#FF6A1A]" />
                     <span>Sensors</span>
                   </div>
-                  <div className="text-xs font-mono font-semibold text-[#E2E8F0] mt-1 truncate">
+                  <div
+                    className={`text-xs font-mono font-semibold mt-1 truncate ${
+                      isLight ? "text-slate-800" : "text-[#E2E8F0]"
+                    }`}
+                  >
                     {activeItem.specs.sensors}
                   </div>
                 </div>
 
-                <div className="p-3 rounded-xl border border-white/5 bg-[#0D1016]">
-                  <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#7B828F] uppercase">
+                <div
+                  className={`p-3 rounded-xl border ${
+                    isLight ? "border-slate-200 bg-slate-50" : "border-white/5 bg-[#0D1016]"
+                  }`}
+                >
+                  <div
+                    className={`flex items-center gap-1.5 text-[10px] font-mono uppercase ${
+                      isLight ? "text-slate-500" : "text-[#7B828F]"
+                    }`}
+                  >
                     <Zap size={12} className="text-[#FF6A1A]" />
                     <span>Motors</span>
                   </div>
-                  <div className="text-xs font-mono font-semibold text-[#E2E8F0] mt-1 truncate">
+                  <div
+                    className={`text-xs font-mono font-semibold mt-1 truncate ${
+                      isLight ? "text-slate-800" : "text-[#E2E8F0]"
+                    }`}
+                  >
                     {activeItem.specs.motors}
                   </div>
                 </div>
 
-                <div className="p-3 rounded-xl border border-white/5 bg-[#0D1016]">
-                  <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#7B828F] uppercase">
+                <div
+                  className={`p-3 rounded-xl border ${
+                    isLight ? "border-slate-200 bg-slate-50" : "border-white/5 bg-[#0D1016]"
+                  }`}
+                >
+                  <div
+                    className={`flex items-center gap-1.5 text-[10px] font-mono uppercase ${
+                      isLight ? "text-slate-500" : "text-[#7B828F]"
+                    }`}
+                  >
                     <Scale size={12} className="text-[#FF6A1A]" />
                     <span>Weight (AUW)</span>
                   </div>
-                  <div className="text-xs font-mono font-semibold text-[#E2E8F0] mt-1 truncate">
+                  <div
+                    className={`text-xs font-mono font-semibold mt-1 truncate ${
+                      isLight ? "text-slate-800" : "text-[#E2E8F0]"
+                    }`}
+                  >
                     {activeItem.specs.weight}
                   </div>
                 </div>

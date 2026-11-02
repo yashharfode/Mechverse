@@ -3,13 +3,16 @@
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { Sparkles, ArrowDown } from "lucide-react";
+import { AppTheme } from "@/types/machine";
 import { TOKENS } from "@/constants/designTokens";
 
 interface MachineRevealProps {
   onLaunchStudio?: () => void;
+  theme?: AppTheme;
 }
 
-export default function MachineReveal({ onLaunchStudio }: MachineRevealProps) {
+export default function MachineReveal({ onLaunchStudio, theme = "dark" }: MachineRevealProps) {
+  const isLight = theme === "light";
   const [progress, setProgress] = useState<number>(0.85);
   const [targetProgress, setTargetProgress] = useState<number>(0.85);
   const [isCoverOn, setIsCoverOn] = useState<boolean>(false);
@@ -71,43 +74,64 @@ export default function MachineReveal({ onLaunchStudio }: MachineRevealProps) {
     <section
       ref={sectionRef}
       id="reveal"
-      className="relative w-full py-16 sm:py-24 px-4 sm:px-6 md:px-12 border-t border-white/5 overflow-hidden"
-      style={{ backgroundColor: "#060709" }}
+      className={`relative w-full py-16 sm:py-24 px-4 sm:px-6 md:px-12 border-t overflow-hidden transition-colors duration-300 ${
+        isLight ? "bg-white border-slate-200" : "border-white/5"
+      }`}
+      style={{ backgroundColor: isLight ? "#ffffff" : "#060709" }}
     >
       {/* Background Studio Vignette Gradient */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: `
-            radial-gradient(circle at 50% 18%, rgba(255,106,26,0.06) 0%, transparent 60%),
-            radial-gradient(circle at 50% 85%, rgba(255,255,255,0.015) 0%, transparent 50%)
-          `,
+          background: isLight
+            ? `
+              radial-gradient(circle at 50% 18%, rgba(255,106,26,0.04) 0%, transparent 60%),
+              radial-gradient(circle at 50% 85%, rgba(0,0,0,0.02) 0%, transparent 50%)
+            `
+            : `
+              radial-gradient(circle at 50% 18%, rgba(255,106,26,0.06) 0%, transparent 60%),
+              radial-gradient(circle at 50% 85%, rgba(255,255,255,0.015) 0%, transparent 50%)
+            `,
         }}
       />
 
       <div className="relative z-10 max-w-6xl mx-auto flex flex-col items-center">
         {/* Section Header */}
         <div className="text-center space-y-3 mb-8 sm:mb-10">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-orange-500/25 bg-[#0F1114]/90 shadow-sm">
+          <div
+            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border shadow-sm ${
+              isLight ? "border-orange-500/25 bg-slate-50" : "border-orange-500/25 bg-[#0F1114]/90"
+            }`}
+          >
             <span className="w-2 h-2 rounded-full bg-[#FF6A1A] animate-pulse" />
-            <span className="text-[11px] font-mono tracking-widest text-[#9AA0A9] uppercase font-semibold">
+            <span className={`text-[11px] font-mono tracking-widest uppercase font-semibold ${isLight ? "text-slate-600" : "text-[#9AA0A9]"}`}>
               INTERACTIVE 3D MACHINE REVEAL
             </span>
           </div>
 
-          <h2 className="text-2xl sm:text-4xl md:text-5xl font-light text-[#F4F5F7] tracking-tight">
+          <h2 className={`text-2xl sm:text-4xl md:text-5xl font-light tracking-tight ${isLight ? "text-slate-900" : "text-[#F4F5F7]"}`}>
             Scroll to Unveil Engineering{" "}
             <span className="font-semibold text-[#FF6A1A]">Precision</span>.
           </h2>
-          <p className="text-xs sm:text-sm text-[#9AA0A9] max-w-xl mx-auto leading-relaxed">
+          <p className={`text-xs sm:text-sm max-w-xl mx-auto leading-relaxed ${isLight ? "text-slate-600" : "text-[#9AA0A9]"}`}>
             Reveal the engineering behind every machine.
           </p>
         </div>
 
         {/* CAD Studio Showcase Card */}
-        <div className="relative w-full aspect-[16/9] min-h-[380px] max-h-[620px] rounded-2xl border border-white/10 bg-[#08090C] overflow-hidden shadow-[0_24px_70px_rgba(0,0,0,0.9)] flex items-center justify-center">
+        <div
+          className={`relative w-full aspect-[16/9] min-h-[380px] max-h-[620px] rounded-2xl border overflow-hidden flex items-center justify-center ${
+            isLight
+              ? "border-slate-200 bg-slate-100 shadow-[0_24px_50px_rgba(0,0,0,0.08)]"
+              : "border-white/10 bg-[#08090C] shadow-[0_24px_70px_rgba(0,0,0,0.9)]"
+          }`}
+        >
           {/* Top Bar: Status Badge (Left) & Cover Switch (Right) */}
-          <div className="absolute top-4 left-4 sm:left-6 z-30 flex items-center gap-2 bg-[#0B0D12]/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10">
+          <div
+            className={`absolute top-4 left-4 sm:left-6 z-30 flex items-center gap-2 backdrop-blur-md px-3.5 py-1.5 rounded-full border ${
+              isLight ? "bg-white/90 border-slate-200" : "bg-[#0B0D12]/90 border-white/10"
+            }`}
+          >
             <span
               className="w-2 h-2 rounded-full transition-colors duration-300 shrink-0"
               style={{
@@ -115,7 +139,11 @@ export default function MachineReveal({ onLaunchStudio }: MachineRevealProps) {
                 boxShadow: `0 0 8px ${isCoverOn ? "#eab308" : "#22c55e"}`,
               }}
             />
-            <span className="text-[10px] sm:text-xs font-mono text-[#E2E8F0] tracking-wider uppercase font-semibold">
+            <span
+              className={`text-[10px] sm:text-xs font-mono tracking-wider uppercase font-semibold ${
+                isLight ? "text-slate-800" : "text-[#E2E8F0]"
+              }`}
+            >
               {isCoverOn
                 ? "STATE: SILHOUETTE SHROUDED"
                 : "STATE: SHROUD REVEALED • READY FOR FLIGHT"}
@@ -123,8 +151,12 @@ export default function MachineReveal({ onLaunchStudio }: MachineRevealProps) {
           </div>
 
           {/* Cover Switch Toggle Button */}
-          <div className="absolute top-4 right-4 sm:right-6 z-30 flex items-center gap-2.5 bg-[#0B0D12]/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10">
-            <span className="text-[11px] font-mono tracking-wider text-[#A0A6B2] uppercase font-semibold">
+          <div
+            className={`absolute top-4 right-4 sm:right-6 z-30 flex items-center gap-2.5 backdrop-blur-md px-3.5 py-1.5 rounded-full border ${
+              isLight ? "bg-white/90 border-slate-200" : "bg-[#0B0D12]/90 border-white/10"
+            }`}
+          >
+            <span className={`text-[11px] font-mono tracking-wider uppercase font-semibold ${isLight ? "text-slate-700" : "text-[#A0A6B2]"}`}>
               COVER
             </span>
             <button

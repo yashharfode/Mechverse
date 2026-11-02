@@ -3,17 +3,21 @@
 import React from "react";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { TOKENS } from "@/constants/designTokens";
-import { MachineId } from "@/types/machine";
+import { AppTheme, MachineId } from "@/types/machine";
 
 interface CTAProps {
   onLaunchStudio: (machineId?: MachineId) => void;
+  theme?: AppTheme;
 }
 
-export default function CTA({ onLaunchStudio }: CTAProps) {
+export default function CTA({ onLaunchStudio, theme = "dark" }: CTAProps) {
+  const isLight = theme === "light";
+
   return (
     <section
-      className="relative w-full py-20 sm:py-28 px-4 sm:px-6 md:px-12 border-t border-white/10 overflow-hidden text-center"
-      style={{ backgroundColor: TOKENS.colors.background }}
+      className={`relative w-full py-20 sm:py-28 px-4 sm:px-6 md:px-12 border-t overflow-hidden text-center transition-colors duration-300 ${
+        isLight ? "border-slate-200 bg-[#f8fafc]" : "border-white/10 bg-[#07080A]"
+      }`}
     >
       {/* Subtle radial glow */}
       <div
@@ -24,14 +28,22 @@ export default function CTA({ onLaunchStudio }: CTAProps) {
       />
 
       <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center space-y-6 sm:space-y-8">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-orange-500/30 bg-[#0F1114]/90 shadow-md">
+        <div
+          className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border shadow-md ${
+            isLight ? "border-orange-500/25 bg-orange-50/80 text-slate-700 font-medium" : "border-orange-500/30 bg-[#0F1114]/90 text-[#9AA0A9]"
+          }`}
+        >
           <Sparkles size={12} className="text-[#FF6A1A] animate-pulse" />
-          <span className="text-[11px] font-mono-tech tracking-widest text-[#9AA0A9] uppercase font-medium">
+          <span className="text-[11px] font-mono-tech tracking-widest uppercase">
             Start Engineering
           </span>
         </div>
 
-        <h2 className="text-3xl sm:text-5xl md:text-6xl font-light text-[#F4F5F7] tracking-tight max-w-2xl">
+        <h2
+          className={`text-3xl sm:text-5xl md:text-6xl font-light tracking-tight max-w-2xl ${
+            isLight ? "text-slate-900" : "text-[#F4F5F7]"
+          }`}
+        >
           Build Real Machines{" "}
           <span className="font-semibold text-[#FF6A1A]">
             Beyond Ordinary
@@ -39,7 +51,11 @@ export default function CTA({ onLaunchStudio }: CTAProps) {
           .
         </h2>
 
-        <p className="text-xs sm:text-base text-slate-400 max-w-xl leading-relaxed">
+        <p
+          className={`text-xs sm:text-base max-w-xl leading-relaxed ${
+            isLight ? "text-slate-600" : "text-slate-400"
+          }`}
+        >
           Select any machine, inspect its complete internal 3D assembly, run 400Hz physics, and follow step-by-step
           build tutorials with verified Indian supplier BOMs from just ₹1,955.
         </p>
@@ -54,12 +70,24 @@ export default function CTA({ onLaunchStudio }: CTAProps) {
           ].map((stat, i) => (
             <div
               key={i}
-              className="p-3 sm:p-4 rounded-xl border border-white/10 bg-[#0F1114]/80 backdrop-blur-md flex flex-col items-center text-center shadow-lg"
+              className={`p-3 sm:p-4 rounded-xl border flex flex-col items-center text-center ${
+                isLight
+                  ? "border-slate-200 bg-white shadow-md shadow-slate-200/50"
+                  : "border-white/10 bg-[#0F1114]/80 backdrop-blur-md shadow-lg"
+              }`}
             >
-              <span className="text-xs sm:text-sm font-mono font-bold text-white tracking-wider">
+              <span
+                className={`text-xs sm:text-sm font-mono font-bold tracking-wider ${
+                  isLight ? "text-slate-900" : "text-white"
+                }`}
+              >
                 {stat.label}
               </span>
-              <span className="text-[10px] sm:text-[11px] font-mono text-[#9AA0A9] mt-0.5">
+              <span
+                className={`text-[10px] sm:text-[11px] font-mono mt-0.5 ${
+                  isLight ? "text-slate-500" : "text-[#9AA0A9]"
+                }`}
+              >
                 {stat.sub}
               </span>
             </div>
@@ -85,7 +113,11 @@ export default function CTA({ onLaunchStudio }: CTAProps) {
               e.preventDefault();
               document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth", block: "start" });
             }}
-            className="w-full sm:w-auto justify-center px-6 py-4 rounded-xl text-xs font-mono-tech font-medium tracking-wider text-slate-300 hover:text-white flex items-center gap-2 transition-all cursor-pointer uppercase border border-white/10 bg-[#0F1114] hover:bg-[#161A1F] hover:border-white/30"
+            className={`w-full sm:w-auto justify-center px-6 py-4 rounded-xl text-xs font-mono-tech font-medium tracking-wider flex items-center gap-2 transition-all cursor-pointer uppercase border ${
+              isLight
+                ? "border-slate-300 bg-white hover:bg-slate-100 text-slate-800 shadow-sm"
+                : "border-white/10 bg-[#0F1114] hover:bg-[#161A1F] hover:border-white/30 text-slate-300 hover:text-white"
+            }`}
           >
             <span>Browse All 8 Machines</span>
           </a>

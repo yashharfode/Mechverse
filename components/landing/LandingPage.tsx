@@ -46,29 +46,29 @@ export default function LandingPage({
 
       <main className="flex-1 w-full flex flex-col">
         {/* 2. Real Interactive 3D Hero Scene with actual WebGL machines */}
-        <HeroScene onLaunchStudio={onLaunchStudio} onOpenAR={onOpenAR} />
+        <HeroScene onLaunchStudio={onLaunchStudio} onOpenAR={onOpenAR} theme={theme} />
 
         {/* 3. Signature Machine Reveal (Drag-to-reveal orbital arc slider) */}
-        <MachineReveal onLaunchStudio={onLaunchStudio} />
+        <MachineReveal onLaunchStudio={onLaunchStudio} theme={theme} />
 
         {/* 4. Machine Showcase (Scroll/tab sequence with cinematic crossfading) */}
-        <MachineShowcase onLaunchStudio={onLaunchStudio} />
+        <MachineShowcase onLaunchStudio={onLaunchStudio} theme={theme} />
 
         {/* 5. Exploded View (CAD layer-by-layer disassembly slider) */}
-        <ExplodedView onLaunchStudio={onLaunchStudio} />
+        <ExplodedView onLaunchStudio={onLaunchStudio} theme={theme} />
 
         {/* 6. Machine Catalog Grid (Verified Indian BOMs and component specs) */}
-        <CatalogGrid onLaunchStudio={onLaunchStudio} onOpenAR={onOpenAR} />
+        <CatalogGrid onLaunchStudio={onLaunchStudio} onOpenAR={onOpenAR} theme={theme} />
 
         {/* 7. Structured 4-Stage Build Workflow */}
-        <BuildProcess />
+        <BuildProcess theme={theme} />
 
         {/* 8. Call to Action */}
-        <CTA onLaunchStudio={onLaunchStudio} />
+        <CTA onLaunchStudio={onLaunchStudio} theme={theme} />
       </main>
 
       {/* 9. Minimalist Engineering Footer */}
-      <Footer onLaunchStudio={onLaunchStudio} />
+      <Footer onLaunchStudio={onLaunchStudio} theme={theme} />
     </div>
   );
 }

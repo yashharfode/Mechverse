@@ -20,13 +20,14 @@ import {
   Swords,
   Layers,
 } from "lucide-react";
-import { CustomizationSettings, MachineId, BattleCarId } from "@/types/machine";
+import { CustomizationSettings, MachineId, BattleCarId, AppTheme } from "@/types/machine";
 
 interface CustomizerPanelProps {
   machineId: MachineId;
   customization: CustomizationSettings;
   onChangeCustomization: (settings: CustomizationSettings) => void;
   onSaveDesign: (name: string) => void;
+  theme?: AppTheme;
 }
 
 // Universal Palettes
@@ -127,7 +128,9 @@ export default function CustomizerPanel({
   customization,
   onChangeCustomization,
   onSaveDesign,
+  theme = "dark",
 }: CustomizerPanelProps) {
+  const isLight = theme === "light";
   const [designName, setDesignName] = useState(
     machineId === "sports-car"
       ? "Apex Speciale Edition"
@@ -155,14 +158,22 @@ export default function CustomizerPanel({
 
   return (
     <aside className="absolute top-20 right-4 z-20 w-80 sm:w-88 max-w-[calc(100vw-2rem)] pointer-events-auto">
-      <div className="rounded-2xl border border-white/15 bg-[#111318]/95 backdrop-blur-xl p-5 shadow-2xl space-y-5 max-h-[82vh] overflow-y-auto custom-scrollbar">
+      <div
+        className={`rounded-2xl border backdrop-blur-xl p-5 shadow-2xl space-y-5 max-h-[82vh] overflow-y-auto custom-scrollbar transition ${
+          isLight
+            ? "border-slate-200 bg-white/95 text-slate-900 shadow-slate-200/50"
+            : "border-white/15 bg-[#111318]/95 text-white"
+        }`}
+      >
         {/* Header */}
         <div>
           <span className="text-[10px] font-mono tracking-widest text-orange-400 uppercase bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/20">
             SPECIFICATION STUDIO
           </span>
-          <h3 className="text-xl font-bold text-white mt-1.5">Customize Machine</h3>
-          <p className="text-xs text-gray-400 mt-1">
+          <h3 className={`text-xl font-bold mt-1.5 ${isLight ? "text-slate-900" : "text-white"}`}>
+            Customize Machine
+          </h3>
+          <p className={`text-xs mt-1 ${isLight ? "text-slate-600" : "text-gray-400"}`}>
             Configure exterior finishes, materials, and mechanical colors in real-time.
           </p>
         </div>

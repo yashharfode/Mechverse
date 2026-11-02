@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Plus, CheckCircle2, X } from "lucide-react";
-import { MachineId } from "@/types/machine";
+import { AppTheme, MachineId } from "@/types/machine";
 import { TOKENS } from "@/constants/designTokens";
 import MachineCard, { CatalogMachineItem } from "./MachineCard";
 import Quick3DModal from "./Quick3DModal";
@@ -10,6 +10,7 @@ import Quick3DModal from "./Quick3DModal";
 interface CatalogGridProps {
   onLaunchStudio: (machineId: MachineId) => void;
   onOpenAR?: (machineId: MachineId) => void;
+  theme?: AppTheme;
 }
 
 const CATALOG_ITEMS: CatalogMachineItem[] = [
@@ -188,7 +189,8 @@ const CATALOG_ITEMS: CatalogMachineItem[] = [
 
 type CategoryFilter = "all" | "drones" | "robotics" | "vehicles" | "aerial" | "industrial";
 
-export default function CatalogGrid({ onLaunchStudio, onOpenAR }: CatalogGridProps) {
+export default function CatalogGrid({ onLaunchStudio, onOpenAR, theme = "dark" }: CatalogGridProps) {
+  const isLight = theme === "light";
   const [filter, setFilter] = useState<CategoryFilter>("all");
   const [quickPreviewId, setQuickPreviewId] = useState<MachineId | null>(null);
   const [showRequestModal, setShowRequestModal] = useState<boolean>(false);
@@ -223,24 +225,26 @@ export default function CatalogGrid({ onLaunchStudio, onOpenAR }: CatalogGridPro
   return (
     <section
       id="catalog"
-      className="relative w-full py-14 sm:py-20 px-4 sm:px-6 md:px-12 border-t border-white/5 overflow-hidden"
-      style={{ backgroundColor: TOKENS.colors.background }}
+      className={`relative w-full py-14 sm:py-20 px-4 sm:px-6 md:px-12 border-t overflow-hidden transition-colors duration-300 ${
+        isLight ? "bg-[#f8fafc] border-slate-200" : "border-white/5"
+      }`}
+      style={{ backgroundColor: isLight ? "#f8fafc" : TOKENS.colors.background }}
     >
       <div className="max-w-7xl mx-auto flex flex-col space-y-8 sm:space-y-12">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-2 sm:space-y-3">
-            <div className="text-[10px] sm:text-[11px] font-mono tracking-widest text-[#9AA0A9] uppercase">
+            <div className={`text-[10px] sm:text-[11px] font-mono tracking-widest uppercase ${isLight ? "text-slate-500" : "text-[#9AA0A9]"}`}>
               Machine Catalog
             </div>
-            <h2 className="text-2xl sm:text-4xl font-light text-[#F4F5F7] tracking-tight">
+            <h2 className={`text-2xl sm:text-4xl font-light tracking-tight ${isLight ? "text-slate-900" : "text-[#F4F5F7]"}`}>
               Explore Engineering{" "}
               <span className="font-semibold" style={{ color: TOKENS.colors.accent }}>
                 Machines
               </span>
               .
             </h2>
-            <p className="text-xs sm:text-sm text-[#9AA0A9] max-w-xl leading-relaxed">
+            <p className={`text-xs sm:text-sm max-w-xl leading-relaxed ${isLight ? "text-slate-600" : "text-[#9AA0A9]"}`}>
               Every project includes verified 3D CAD files, visual previews of internal parts, assembly explosion steps, real wiring diagrams,
               and BOM sourcing with verified Indian component prices.
             </p>
@@ -254,7 +258,11 @@ export default function CatalogGrid({ onLaunchStudio, onOpenAR }: CatalogGridPro
                 onClick={() => setFilter(cat.id)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-mono whitespace-nowrap transition-all cursor-pointer ${
                   filter === cat.id
-                    ? "bg-[#161A1F] text-white border border-white/30"
+                    ? isLight
+                      ? "bg-slate-900 text-white shadow-sm"
+                      : "bg-[#161A1F] text-white border border-white/30"
+                    : isLight
+                    ? "bg-white text-slate-600 border border-slate-200 hover:text-slate-950 hover:bg-slate-50"
                     : "bg-[#0F1114] text-[#9AA0A9] border border-white/5 hover:text-white"
                 }`}
               >
@@ -273,6 +281,7 @@ export default function CatalogGrid({ onLaunchStudio, onOpenAR }: CatalogGridPro
               onLaunch={onLaunchStudio}
               onOpenAR={onOpenAR}
               onOpenQuick3D={(id) => setQuickPreviewId(id)}
+              theme={theme}
             />
           ))}
 
